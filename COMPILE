@@ -1,7 +1,10 @@
 Compiling it.
 
 ATM there is no maven build (yet), and I'm not sure whether it's allowed to bundle android
-APIs to compile against. Just add android sdk to classpath.
+APIs to compile against. Just add android sdk to classpath.  ( take it from your sdk )
 
 jmockit is used to perform unit tests, as everything in android sdk is just a stub
-and will raise runtime exception.
+and will raise runtime exception. ( take care that jmockit is on classpath well before
+junit - this is important )
+
+ ATM there is only idea build as I do not use eclipse. contributions welcome

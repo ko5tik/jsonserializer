@@ -1,0 +1,16 @@
+JSON Serializer is small and lightweight library to marshall
+POJOs to JSON strings intended to use in android applications.
+
+Core features:
+  - small and lightweight
+  - no external dependecies (from android point of view)
+  - no metadata (use reflection)
+  - simple to use
+
+Current state:
+  - marshalls complete POJO trees
+  - unmarshalls POJOs with just primitives
+  - just enough for implementing highscore storage fo my android game (market://search?q=pname:de.pribluda.games.android.lines)
+
+Author(s)
+  - Konstantin Pribluda (project founder)

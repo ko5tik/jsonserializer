@@ -5,11 +5,12 @@
       <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/test/de/pribluda/android/jsonmarshaller/JSONUnmarshallerTest.java" />
       <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/README" />
       <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/LICENSE" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/COMPILE" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/jsonserializer.iws" afterPath="$PROJECT_DIR$/jsonserializer.iws" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/de/pribluda/android/jsonmarshaller/JSONUnmarshaller.java" afterPath="$PROJECT_DIR$/src/main/de/pribluda/android/jsonmarshaller/JSONUnmarshaller.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/de/pribluda/android/jsonmarshaller/JSONMarshaller.java" afterPath="$PROJECT_DIR$/src/main/de/pribluda/android/jsonmarshaller/JSONMarshaller.java" />
       <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/Jsonserializer.iml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/de/pribluda/android/jsonmarshaller/JSONMarshaller.java" />
       <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/test/de/pribluda/android/jsonmarshaller/JSONMarshallerTest.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/de/pribluda/android/jsonmarshaller/JSONUnmarshaller.java" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/COMPILE" />
     </list>
     <ignored path=".idea/workspace.xml" />
     <ignored path="jsonserializer.iws" />
@@ -98,25 +99,43 @@
       <file leaf-file-name="LICENSE" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/LICENSE">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="13" column="17" selection-start="592" selection-end="592" vertical-scroll-proportion="0.0">
+            <state line="13" column="109" selection-start="606" selection-end="606" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
       <file leaf-file-name="COMPILE" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/COMPILE">
+        <entry file="file://$PROJECT_DIR$/COMPILE">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="5" column="31" selection-start="198" selection-end="198" vertical-scroll-proportion="0.0">
+            <state line="9" column="6" selection-start="399" selection-end="399" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="JSONMarshaller.java" pinned="false" current="false" current-in-tab="false">
+      <file leaf-file-name="jsonserializer.ipr" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/jsonserializer.ipr">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="21" column="45" selection-start="933" selection-end="933" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="jsonserializer.iws" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/jsonserializer.iws">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="JSONMarshaller.java" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/main/de/pribluda/android/jsonmarshaller/JSONMarshaller.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="104" column="0" selection-start="4143" selection-end="4143" vertical-scroll-proportion="0.0">
+            <state line="75" column="31" selection-start="3100" selection-end="3100" vertical-scroll-proportion="0.5666004">
               <folding />
             </state>
           </provider>
@@ -125,16 +144,16 @@
       <file leaf-file-name="JSONUnmarshaller.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/de/pribluda/android/jsonmarshaller/JSONUnmarshaller.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="31" column="13" selection-start="998" selection-end="998" vertical-scroll-proportion="0.0">
+            <state line="107" column="33" selection-start="4478" selection-end="4478" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="JSONUnmarshallerTest.java" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="JSONUnmarshallerTest.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/test/de/pribluda/android/jsonmarshaller/JSONUnmarshallerTest.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="49" column="21" selection-start="1585" selection-end="1585" vertical-scroll-proportion="0.5964215">
+            <state line="38" column="13" selection-start="1211" selection-end="1211" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -143,7 +162,7 @@
       <file leaf-file-name="JSONMarshallerTest.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/test/de/pribluda/android/jsonmarshaller/JSONMarshallerTest.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="111" column="25" selection-start="2920" selection-end="2920" vertical-scroll-proportion="0.0">
+            <state line="54" column="41" selection-start="1408" selection-end="1408" vertical-scroll-proportion="0.0">
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -165,9 +184,10 @@
         <option value="$PROJECT_DIR$/LICENSE" />
         <option value="$PROJECT_DIR$/src/COMPILE" />
         <option value="$PROJECT_DIR$/src/main/de/pribluda/android/jsonmarshaller/JSONMarshaller.java" />
-        <option value="$PROJECT_DIR$/src/main/de/pribluda/android/jsonmarshaller/JSONUnmarshaller.java" />
         <option value="$PROJECT_DIR$/src/test/de/pribluda/android/jsonmarshaller/JSONUnmarshallerTest.java" />
         <option value="$PROJECT_DIR$/src/test/de/pribluda/android/jsonmarshaller/JSONMarshallerTest.java" />
+        <option value="$PROJECT_DIR$/COMPILE" />
+        <option value="$PROJECT_DIR$/src/main/de/pribluda/android/jsonmarshaller/JSONUnmarshaller.java" />
       </list>
     </option>
   </component>
@@ -579,40 +599,58 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/LICENSE">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="13" column="17" selection-start="592" selection-end="592" vertical-scroll-proportion="0.0" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/COMPILE">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="5" column="31" selection-start="198" selection-end="198" vertical-scroll-proportion="0.0" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/de/pribluda/android/jsonmarshaller/JSONMarshaller.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="104" column="0" selection-start="4143" selection-end="4143" vertical-scroll-proportion="0.0">
+        <state line="13" column="109" selection-start="606" selection-end="606" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/test/de/pribluda/android/jsonmarshaller/JSONMarshallerTest.java">
+    <entry file="file://$PROJECT_DIR$/jsonserializer.iws">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="111" column="25" selection-start="2920" selection-end="2920" vertical-scroll-proportion="0.0">
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
+        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
+          <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/de/pribluda/android/jsonmarshaller/JSONUnmarshaller.java">
+    <entry file="file://$PROJECT_DIR$/COMPILE">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="31" column="13" selection-start="998" selection-end="998" vertical-scroll-proportion="0.0">
+        <state line="9" column="6" selection-start="399" selection-end="399" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/test/de/pribluda/android/jsonmarshaller/JSONUnmarshallerTest.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="49" column="21" selection-start="1585" selection-end="1585" vertical-scroll-proportion="0.5964215">
+        <state line="38" column="13" selection-start="1211" selection-end="1211" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/de/pribluda/android/jsonmarshaller/JSONUnmarshaller.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="107" column="33" selection-start="4478" selection-end="4478" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/jsonserializer.ipr">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="21" column="45" selection-start="933" selection-end="933" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/test/de/pribluda/android/jsonmarshaller/JSONMarshallerTest.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="54" column="41" selection-start="1408" selection-end="1408" vertical-scroll-proportion="0.0">
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/de/pribluda/android/jsonmarshaller/JSONMarshaller.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="75" column="31" selection-start="3100" selection-end="3100" vertical-scroll-proportion="0.5666004">
           <folding />
         </state>
       </provider>
