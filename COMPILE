@@ -1,0 +1,7 @@
+Compiling it.
+
+ATM there is no maven build (yet), and I'm not sure whether it's allowed to bundle android
+APIs to compile against. Just add android sdk to classpath.
+
+jmockit is used to perform unit tests, as everything in android sdk is just a stub
+and will raise runtime exception.
