@@ -26,7 +26,7 @@
     </developers>
     <build>
         <sourceDirectory>${basedir}/src/main</sourceDirectory>
-        <testSourceDirectory>${basedir}/test</testSourceDirectory>
+        <testSourceDirectory>${basedir}/src/test</testSourceDirectory>
         <plugins>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -38,7 +38,7 @@
             <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
-                    <argLine>-javaagent:"${setting.localRepository}"/mockit/jmockit/0.996/jmockit-0.996.jar</argLine>
+                    <argLine>-javaagent:"${settings.localRepository}"/mockit/jmockit/0.996/jmockit-0.996.jar</argLine>
                 </configuration>
             </plugin>
         </plugins>
