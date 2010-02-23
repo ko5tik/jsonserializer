@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>de.pribluda.android</groupId>
     <artifactId>jsonmarshaller</artifactId>
-    <version>0.1-SNAPSHOT</version>
+    <version>0.2-SNAPSHOT</version>
     <url>http://www.sourceforge.net/projects/jtec</url>
     <description>
         Small json marshaller for POJOs to use in android
@@ -35,33 +35,41 @@
                     <target>1.5</target>
                 </configuration>
             </plugin>
+
             <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
-                    <argLine>-javaagent:"${settings.localRepository}"/mockit/jmockit/0.996/jmockit-0.996.jar</argLine>
+                    <!-- enable this to if you are using java 1.5
+                     <argLine>-javaagent:"${settings.localRepository}"/mockit/jmockit/0.996/jmockit-0.996.jar</argLine>
+                     -->
+                    <!-- those 2 are important!!! -->
+                    <useSystemClassLoader>true</useSystemClassLoader>
+                    <forkMode>always</forkMode>
                 </configuration>
             </plugin>
+
+
         </plugins>
     </build>
     <dependencies>
-        <dependency>
-            <groupId>android</groupId>
-            <artifactId>android</artifactId>
-            <version>1.5</version>
-        </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.7</version>
-            <scope>test</scope>
-        </dependency>
+        <!--  this dependency shall be BEFORE junit -->
         <dependency>
             <groupId>mockit</groupId>
             <artifactId>jmockit</artifactId>
             <version>0.996</version>
             <scope>test</scope>
         </dependency>
-
+           <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.7</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>android</groupId>
+            <artifactId>android</artifactId>
+            <version>1.5</version>
+        </dependency>
     </dependencies>
     <repositories>
         <repository>

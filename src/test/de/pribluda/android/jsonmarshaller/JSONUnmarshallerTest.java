@@ -139,7 +139,7 @@ public class JSONUnmarshallerTest {
     }
 
     /**
-     * string shall be used as to construct (i.e integer) object as only constructor paramter
+     * string shall be used to construct (i.e integer) object as only constructor paramrter
      */
     @Test
     public void testThatStringIsUsedAsConstructorParameter() throws JSONException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {

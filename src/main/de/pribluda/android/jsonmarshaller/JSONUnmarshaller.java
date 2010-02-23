@@ -66,6 +66,7 @@ public class JSONUnmarshaller {
             String methodName = SETTER_PREFIX + key;
             // discriminate based on type
             if (field instanceof String) {
+                //System.err.println("contains string" + field);
                 // string shall be used directly
                 try {
 
@@ -78,14 +79,19 @@ public class JSONUnmarshaller {
                 for (Method method : beanToBeCreatedClass.getMethods()) {
                     //System.err.println("method:" + method);
                     if (methodName.equals(method.getName()) && method.getParameterTypes().length == 1) {
+                        //System.err.println("...candidate with 1 param");
                         Class<?> paramClass = method.getParameterTypes()[0];
                         if (paramClass.isPrimitive() && primitves.get(paramClass) != null) {
+                            //System.err.println("... primitive found");
                             paramClass = primitves.get(paramClass);
                         }
-                        if (paramClass.isAssignableFrom(field.getClass())) {
+                        try {
                             method.invoke(value, paramClass.getConstructor(String.class).newInstance(field));
-                            break;
+                        } catch (NoSuchMethodException nsme) {
+                            // we are failed here,  but so what? be lenient
                         }
+                        break;
+
                     }
                 }
                 // we are done with string
@@ -109,6 +115,7 @@ public class JSONUnmarshaller {
 
     /**
      * convenience method parsing JSON on the fly
+     *
      * @param json
      * @param beanToBeCreatedClass
      * @param <T>
