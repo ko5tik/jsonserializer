@@ -1,0 +1,73 @@
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd"
+         xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>de.pribluda.android</groupId>
+    <artifactId>jsonmarshaller</artifactId>
+    <version>0.1-SNAPSHOT</version>
+    <url>http://www.sourceforge.net/projects/jtec</url>
+    <description>
+        Small json marshaller for POJOs to use in android
+    </description>
+    <inceptionYear>2010</inceptionYear>
+    <scm>
+        <developerConnection>scm:git:git@github.com:ko5tik/jsonserializer.git</developerConnection>
+        <connection>scm:git:http://github.com/ko5tik/jsonserializer.git</connection>
+    </scm>
+    <developers>
+        <developer>
+            <name>Konstantin Pribluda</name>
+            <id>ko5tik</id>
+            <email>konstantin(at)pribluda.de</email>
+            <organization>J-Tec-Team GbR</organization>
+            <roles>
+                <role>all hands person</role>
+            </roles>
+        </developer>
+    </developers>
+    <build>
+        <sourceDirectory>${basedir}/src/main</sourceDirectory>
+        <testSourceDirectory>${basedir}/test</testSourceDirectory>
+        <plugins>
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.5</source>
+                    <target>1.5</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <argLine>-javaagent:"${setting.localRepository}"/mockit/jmockit/0.996/jmockit-0.996.jar</argLine>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+    <dependencies>
+        <dependency>
+            <groupId>android</groupId>
+            <artifactId>android</artifactId>
+            <version>1.5</version>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.7</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>mockit</groupId>
+            <artifactId>jmockit</artifactId>
+            <version>0.996</version>
+            <scope>test</scope>
+        </dependency>
+
+    </dependencies>
+    <repositories>
+        <repository>
+            <id>m2-repo-java-net</id>
+            <name>M2 repository @ java.net</name>
+            <url>http://download.java.net/maven/2/</url>
+        </repository>
+    </repositories>
+</project>
