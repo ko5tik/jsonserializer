@@ -53,7 +53,7 @@ public class JSONMarshaller {
      * @param object
      */
     static void marshallRecursive(JSONObject sink, Object object) throws JSONException, InvocationTargetException, IllegalAccessException {
-        //System.err.println("marshalling...");
+        //System.err.println("marshalling..." + object);
         // nothing to marshall
         if (object == null)
             return;
@@ -81,12 +81,14 @@ public class JSONMarshaller {
                     //System.err.println("determining default constructor");
                     if (method.getReturnType().getConstructor() != null) {
                         JSONObject descendant = new JSONObject();
+                        //System.err.println("nested created");
                         marshallRecursive(descendant, method.invoke(object));
+                        //System.err.println("descendant marshalled");
                         sink.put(propertize(method.getName()), descendant);
                         continue;
                     }
                 } catch (NoSuchMethodException ex) {
-                    System.err.println("failed with exception:" + ex);
+                    //System.err.println("failed with exception:" + ex);
                     // just ignore it here, it means no such constructor was found
                 }
             }

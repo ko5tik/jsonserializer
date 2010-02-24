@@ -101,24 +101,30 @@ public class JSONMarshallerTest {
 
 
     /**
-     * bean shall be followed down
+     * bean shall be inserted as nested JSON object.
+     * nested JSON object shall be populated from bean
      */
-
     @Test
-    public void testBeanIsFollowed(@Mocked final WithBean withBean) throws InvocationTargetException, NoSuchMethodException, JSONException, IllegalAccessException {
-        System.err.println("determine constructors");
-        for (Constructor constructor : GoodPrimitiveGetter.class.getDeclaredConstructors()) {
-            System.err.println("constructor:" + constructor);
-        }
-        (new JSONMarshaller()).marshall(withBean);
-
-        new Verifications() {
-
+    public void testBeanIsFollowed() throws InvocationTargetException, NoSuchMethodException, JSONException, IllegalAccessException {
+        new Expectations() {
             {
-                withBean.getPrimitives();
-                jsonObject.put("Primitives", withAny(GoodPrimitiveGetter.class));
+                // create root json object
+                new JSONObject();
+                // create descendant object
+                 new JSONObject();
+                // retrieve primitive bean (nothing to mock here)
+
+                // marshall getter of  primitive nested bean
+                jsonObject.put("Foo", "foo");
+                // put nested object into parent
+                jsonObject.put("Primitives", withAny(JSONObject.class));
+
             }
         };
+
+        (new JSONMarshaller()).marshall(new WithBean());
+
+
     }
 
     public static class WithBean {
