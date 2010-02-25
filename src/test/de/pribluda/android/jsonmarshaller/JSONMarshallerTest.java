@@ -3,6 +3,7 @@ package de.pribluda.android.jsonmarshaller;
 import mockit.Expectations;
 import mockit.Mocked;
 import mockit.Verifications;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;
@@ -146,6 +147,59 @@ public class JSONMarshallerTest {
                 jsonObject.put("Foo", "foo");
             }
         };
+
+    }
+
+
+    /**
+     * shall marshall primitive array in proper way
+     */
+    @Test
+    public void testThatSingleDimensionalPrimitiveArrayIsMarshalledProperly(@Mocked final JSONArray array) {
+
+        new Expectations() {
+            {
+                // shall create JSON array
+                new JSONArray();
+                // and put values there
+                array.put((Object)1);
+                array.put((Object)2);
+                array.put((Object)3);
+            }
+        };
+      JSONMarshaller.marshallArray(singleDimension);
+    }
+
+     int[] singleDimension = new int[] { 1,2,3 };
+
+    /**
+     *  strings are also primitives, also ensure they are marshalled to array properly
+     * @param array
+     */
+    @Test
+    public void testThatStringArrayIsMarshalledProperly(@Mocked final JSONArray array) {
+
+        new Expectations() {
+            {
+                // shall create JSON array
+                new JSONArray();
+                // and put values there
+                array.put("foo");
+                array.put("bar");
+                array.put("baz");
+            }
+        };
+      JSONMarshaller.marshallArray(singleDimensionString);
+    }
+
+    String[] singleDimensionString = new String[] { "foo","bar","baz"};
+
+
+    /**
+     * multidimensional array must be processed recursively 
+     */
+    @Test
+    public void testThatMultidimensionalArrayIsProcessedRecursively() {
 
     }
 }
