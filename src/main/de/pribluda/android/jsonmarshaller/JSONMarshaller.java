@@ -108,14 +108,21 @@ public class JSONMarshaller {
             Class componentType = array.getClass().getComponentType();
             System.err.println("componentType:" + componentType);
             JSONArray retval = new JSONArray();
-
+            final int arrayLength = Array.getLength(array);
             // stirngs and primitives must be marshalled directly
             if (componentType.isPrimitive() || String.class.equals(componentType)) {
-                final int arrayLength = Array.getLength(array);
+
                 for (int i = 0; i < arrayLength; i++) {
                     retval.put(Array.get(array, i));
                 }
+            } else if(componentType.isArray()) {
+                // that's cool, nested array recurse
+                for(int i = 0; i < arrayLength; i++) {
+                    retval.put(marshallArray(Array.get(array,i)));
+                }
             }
+
+            return retval;
         }
 
         return null;

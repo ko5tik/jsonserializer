@@ -12,6 +12,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
 import static junit.framework.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
 /**
@@ -112,7 +113,7 @@ public class JSONMarshallerTest {
                 // create root json object
                 new JSONObject();
                 // create descendant object
-                 new JSONObject();
+                new JSONObject();
                 // retrieve primitive bean (nothing to mock here)
 
                 // marshall getter of  primitive nested bean
@@ -162,18 +163,19 @@ public class JSONMarshallerTest {
                 // shall create JSON array
                 new JSONArray();
                 // and put values there
-                array.put((Object)1);
-                array.put((Object)2);
-                array.put((Object)3);
+                array.put((Object) 1);
+                array.put((Object) 2);
+                array.put((Object) 3);
             }
         };
-      JSONMarshaller.marshallArray(singleDimension);
+        assertNotNull(JSONMarshaller.marshallArray(singleDimension));
     }
 
-     int[] singleDimension = new int[] { 1,2,3 };
+    int[] singleDimension = new int[]{1, 2, 3};
 
     /**
-     *  strings are also primitives, also ensure they are marshalled to array properly
+     * strings are also primitives, also ensure they are marshalled to array properly
+     *
      * @param array
      */
     @Test
@@ -189,17 +191,36 @@ public class JSONMarshallerTest {
                 array.put("baz");
             }
         };
-      JSONMarshaller.marshallArray(singleDimensionString);
+        assertNotNull(JSONMarshaller.marshallArray(singleDimensionString));
     }
 
-    String[] singleDimensionString = new String[] { "foo","bar","baz"};
+    String[] singleDimensionString = new String[]{"foo", "bar", "baz"};
 
 
     /**
-     * multidimensional array must be processed recursively 
+     * multidimensional array must be processed recursively
      */
     @Test
-    public void testThatMultidimensionalArrayIsProcessedRecursively() {
+    public void testThatMultidimensionalArrayIsProcessedRecursively(@Mocked final JSONArray array) {
+        new Expectations() {
+            {
+                JSONArray root = new JSONArray();
+                JSONArray first = new JSONArray();
+                first.put((Object)1);
+                first.put((Object)2);
+                first.put((Object)3);
+                root.put(first);
+                JSONArray second = new JSONArray();
+                second.put((Object)4);
+                second.put((Object)5);
+                second.put((Object)6);
+                root.put(second);
+            }
+        };
 
+        assertNotNull(JSONMarshaller.marshallArray(multiDimension));
     }
+
+
+    int[][] multiDimension = new int[][]{{1, 2, 3}, {4, 5, 6}};
 }
