@@ -171,7 +171,7 @@ public class JSONMarshallerTest {
         assertNotNull(JSONMarshaller.marshallArray(singleDimension));
     }
 
-    int[] singleDimension = new int[]{1, 2, 3};
+    static int[] singleDimension = new int[]{1, 2, 3};
 
     /**
      * strings are also primitives, also ensure they are marshalled to array properly
@@ -264,4 +264,35 @@ public class JSONMarshallerTest {
     }
 
     NotABean[] badBeans = new NotABean[]{new NotABean()};
+
+
+    /**
+     * array propeprty shall be followed and serialized
+     */
+    @Test
+    public void testArrayPropertyIsSerialized(@Mocked final JSONArray array) throws InvocationTargetException, NoSuchMethodException, JSONException, IllegalAccessException {
+        new Expectations() {
+            {
+                //  shall create JSON Object
+                new JSONObject();
+
+                // and serialize aeeay
+                  // shall create JSON array
+                JSONArray first = new JSONArray();
+                // and put values there
+                first.put((Object)1);
+                first.put((Object)2);
+                first.put((Object)3);
+
+                jsonObject.put("IntArray",first);
+            }
+        };
+        assertNotNull(JSONMarshaller.marshall(new WithArray()));
+    }
+
+    public static class WithArray {
+        public int[] getIntArray() {
+            return singleDimension;
+        }
+    }
 }

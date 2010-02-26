@@ -54,8 +54,7 @@ public class JSONMarshaller {
      * @param sink
      * @param object
      */
-    static void marshallRecursive(JSONObject sink, Object object) throws JSONException, InvocationTargetException, IllegalAccessException {
-        //System.err.println("marshalling..." + object);
+    static void marshallRecursive(JSONObject sink, Object object) throws JSONException, InvocationTargetException, IllegalAccessException, NoSuchMethodException {
         // nothing to marshall
         if (object == null)
             return;
@@ -65,33 +64,27 @@ public class JSONMarshaller {
         // object not null,  and is not primitive - iterate through getters
         for (Method method : object.getClass().getDeclaredMethods()) {
             // our getters are parameterless and start with "get"
-            // System.err.println("method:" + method);
-            //System.err.println("method return type:" + method.getReturnType());
-            //System.err.println("method name:" + method.getName());
             if (method.getName().startsWith(GETTER_PREFIX) && method.getName().length() > BEGIN_INDEX && (method.getModifiers() & Modifier.PUBLIC) != 0 && method.getParameterTypes().length == 0 && method.getReturnType() != void.class) {
-                //System.err.println("method name passsed");
-                // is return value primitive?
+                 // is return value primitive?
                 Class<?> type = method.getReturnType();
                 if (type.isPrimitive() || String.class.equals(type)) {
                     // it is, marshall it
-                   //    System.err.println("marshall primitive " + method.getName() + "/" + method.invoke(object));
+                    //    System.err.println("marshall primitive " + method.getName() + "/" + method.invoke(object));
                     sink.put(propertize(method.getName()), method.invoke(object));
                     continue;
-                }
-                // does it have default constructor?
-                try {
-                    //System.err.println("determining default constructor:" + method.getReturnType().getConstructor());
-                    if (method.getReturnType().getConstructor() != null) {
-                        //JSONObject descendant = new JSONObject();
-                        //System.err.println("nested created");
-                        //marshallRecursive(descendant, method.invoke(object));
-                        //System.err.println("descendant marshalled");
-                        sink.put(propertize(method.getName()), marshall(method.invoke(object)));
-                        continue;
+                } else if (type.isArray()) {
+                    sink.put(propertize(method.getName()), marshallArray(method.invoke(object)));
+                    continue;
+                } else {
+                    // does it have default constructor?
+                    try {
+                         if (method.getReturnType().getConstructor() != null) {
+                            sink.put(propertize(method.getName()), marshall(method.invoke(object)));
+                            continue;
+                        }
+                    } catch (NoSuchMethodException ex) {
+                        // just ignore it here, it means no such constructor was found
                     }
-                } catch (NoSuchMethodException ex) {
-                    //System.err.println("failed with exception:" + ex);
-                    // just ignore it here, it means no such constructor was found
                 }
             }
         }
@@ -106,7 +99,6 @@ public class JSONMarshaller {
     static JSONArray marshallArray(Object array) throws InvocationTargetException, NoSuchMethodException, JSONException, IllegalAccessException {
         if (array.getClass().isArray()) {
             Class componentType = array.getClass().getComponentType();
-            System.err.println("componentType:" + componentType);
             JSONArray retval = new JSONArray();
             final int arrayLength = Array.getLength(array);
             // stirngs and primitives must be marshalled directly
