@@ -156,7 +156,7 @@ public class JSONMarshallerTest {
      * shall marshall primitive array in proper way
      */
     @Test
-    public void testThatSingleDimensionalPrimitiveArrayIsMarshalledProperly(@Mocked final JSONArray array) {
+    public void testThatSingleDimensionalPrimitiveArrayIsMarshalledProperly(@Mocked final JSONArray array) throws InvocationTargetException, NoSuchMethodException, JSONException, IllegalAccessException {
 
         new Expectations() {
             {
@@ -179,7 +179,7 @@ public class JSONMarshallerTest {
      * @param array
      */
     @Test
-    public void testThatStringArrayIsMarshalledProperly(@Mocked final JSONArray array) {
+    public void testThatStringArrayIsMarshalledProperly(@Mocked final JSONArray array) throws InvocationTargetException, NoSuchMethodException, JSONException, IllegalAccessException {
 
         new Expectations() {
             {
@@ -201,19 +201,19 @@ public class JSONMarshallerTest {
      * multidimensional array must be processed recursively
      */
     @Test
-    public void testThatMultidimensionalArrayIsProcessedRecursively(@Mocked final JSONArray array) {
+    public void testThatMultidimensionalArrayIsProcessedRecursively(@Mocked final JSONArray array) throws InvocationTargetException, NoSuchMethodException, JSONException, IllegalAccessException {
         new Expectations() {
             {
                 JSONArray root = new JSONArray();
                 JSONArray first = new JSONArray();
-                first.put((Object)1);
-                first.put((Object)2);
-                first.put((Object)3);
+                first.put((Object) 1);
+                first.put((Object) 2);
+                first.put((Object) 3);
                 root.put(first);
                 JSONArray second = new JSONArray();
-                second.put((Object)4);
-                second.put((Object)5);
-                second.put((Object)6);
+                second.put((Object) 4);
+                second.put((Object) 5);
+                second.put((Object) 6);
                 root.put(second);
             }
         };
@@ -223,4 +223,45 @@ public class JSONMarshallerTest {
 
 
     int[][] multiDimension = new int[][]{{1, 2, 3}, {4, 5, 6}};
+
+
+    /**
+     * array of beans shall be masrhalled
+     */
+    @Test
+    public void testBeanArrayIsMarshalled(@Mocked final JSONArray array) throws InvocationTargetException, NoSuchMethodException, JSONException, IllegalAccessException {
+
+        new Expectations() {
+            {
+                // shall create json array
+                new JSONArray();
+                // create and populate object out of bean
+                new JSONObject();
+                jsonObject.put("Foo", "foo");
+                // and store it in resulting array
+                array.put(withAny(JSONObject.class));
+            }
+        };
+        assertNotNull(JSONMarshaller.marshallArray(goodBeans));
+    }
+
+    GoodPrimitiveGetter[] goodBeans = new GoodPrimitiveGetter[]{new GoodPrimitiveGetter()};
+
+
+    /**
+     * array of not suitable type shall come out empty
+     * (TODO: this behaviour is discutable, whether this shall come out as null )
+     */
+    @Test
+    public void testThatArrayOfBadTypeComesOutEmpty(@Mocked final JSONArray array) throws InvocationTargetException, NoSuchMethodException, JSONException, IllegalAccessException {
+        new Expectations() {
+            {
+                // shall create json array
+                new JSONArray();
+
+            }};
+        assertNotNull(JSONMarshaller.marshallArray(badBeans));
+    }
+
+    NotABean[] badBeans = new NotABean[]{new NotABean()};
 }

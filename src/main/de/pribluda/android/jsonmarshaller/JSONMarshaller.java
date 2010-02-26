@@ -74,19 +74,19 @@ public class JSONMarshaller {
                 Class<?> type = method.getReturnType();
                 if (type.isPrimitive() || String.class.equals(type)) {
                     // it is, marshall it
-                    //   System.err.println("marshall primitive " + method.getName() + "/" + method.invoke(object));
+                   //    System.err.println("marshall primitive " + method.getName() + "/" + method.invoke(object));
                     sink.put(propertize(method.getName()), method.invoke(object));
                     continue;
                 }
                 // does it have default constructor?
                 try {
-                    //System.err.println("determining default constructor");
+                    //System.err.println("determining default constructor:" + method.getReturnType().getConstructor());
                     if (method.getReturnType().getConstructor() != null) {
-                        JSONObject descendant = new JSONObject();
+                        //JSONObject descendant = new JSONObject();
                         //System.err.println("nested created");
-                        marshallRecursive(descendant, method.invoke(object));
+                        //marshallRecursive(descendant, method.invoke(object));
                         //System.err.println("descendant marshalled");
-                        sink.put(propertize(method.getName()), descendant);
+                        sink.put(propertize(method.getName()), marshall(method.invoke(object)));
                         continue;
                     }
                 } catch (NoSuchMethodException ex) {
@@ -103,7 +103,7 @@ public class JSONMarshaller {
      * @param array
      * @return
      */
-    static JSONArray marshallArray(Object array) {
+    static JSONArray marshallArray(Object array) throws InvocationTargetException, NoSuchMethodException, JSONException, IllegalAccessException {
         if (array.getClass().isArray()) {
             Class componentType = array.getClass().getComponentType();
             System.err.println("componentType:" + componentType);
@@ -115,10 +115,22 @@ public class JSONMarshaller {
                 for (int i = 0; i < arrayLength; i++) {
                     retval.put(Array.get(array, i));
                 }
-            } else if(componentType.isArray()) {
+            } else if (componentType.isArray()) {
                 // that's cool, nested array recurse
-                for(int i = 0; i < arrayLength; i++) {
-                    retval.put(marshallArray(Array.get(array,i)));
+                for (int i = 0; i < arrayLength; i++) {
+                    retval.put(marshallArray(Array.get(array, i)));
+                }
+            } else {
+                // treat component as a bean   if it got default constructor
+                try {
+                    //System.err.println("determining default constructor:" + componentType.getConstructor());
+                    if (componentType.getConstructor() != null) {
+                        for (int i = 0; i < arrayLength; i++) {
+                            retval.put(marshall(Array.get(array, i)));
+                        }
+                    }
+                } catch (NoSuchMethodException ex) {
+                    // just ignore it here, it means no such constructor was found
                 }
             }
 
