@@ -18,6 +18,7 @@
 package de.pribluda.android.jsonmarshaller;
 
 import android.util.Log;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -64,53 +65,81 @@ public class JSONUnmarshaller {
             String key = (String) keys.next();
             Object field = jsonObject.get(key);
             String methodName = SETTER_PREFIX + key;
-            // discriminate based on type
-            if (field instanceof String) {
-                //System.err.println("contains string" + field);
-                // string shall be used directly
-                try {
 
-                    beanToBeCreatedClass.getMethod(methodName, String.class).invoke(value, field);
-                    continue;
-                } catch (NoSuchMethodException e) {
-                    // that means there was no such method, proceed
-                }
-                // or maybe there is method with suitable parameter?
-                for (Method method : beanToBeCreatedClass.getMethods()) {
-                    //System.err.println("method:" + method);
-                    if (methodName.equals(method.getName()) && method.getParameterTypes().length == 1) {
-                        //System.err.println("...candidate with 1 param");
-                        Class<?> paramClass = method.getParameterTypes()[0];
-                        if (paramClass.isPrimitive() && primitves.get(paramClass) != null) {
-                            //System.err.println("... primitive found");
-                            paramClass = primitves.get(paramClass);
-                        }
-                        try {
-                            method.invoke(value, paramClass.getConstructor(String.class).newInstance(field));
-                        } catch (NoSuchMethodException nsme) {
-                            // we are failed here,  but so what? be lenient
-                        }
-                        break;
+            Method method = getCandidateMethod(beanToBeCreatedClass, methodName);
 
+            Class clazz = method.getParameterTypes()[0];
+
+            if (method != null) {
+                // discriminate based on type
+                if (field instanceof String) {
+
+                    // string shall be used directly, either to set or as constructor parameter (if suitable)
+                    try {
+
+                        beanToBeCreatedClass.getMethod(methodName, String.class).invoke(value, field);
+                        continue;
+                    } catch (NoSuchMethodException e) {
+                        // that means there was no such method, proceed
                     }
+                    // or maybe there is method with suitable parameter?
+                    if (clazz.isPrimitive() && primitves.get(clazz) != null) {
+                        //System.err.println("... primitive found");
+                        clazz = primitves.get(clazz);
+                    }
+                    try {
+                        method.invoke(value, clazz.getConstructor(String.class).newInstance(field));
+                    } catch (NoSuchMethodException nsme) {
+                        // we are failed here,  but so what? be lenient
+                    }
+
                 }
                 // we are done with string
-            } else {
-                // catch all - everything except string shall be processed via dedicated setter
-                for (Method method : beanToBeCreatedClass.getMethods()) {
-                    //System.err.println("method:" + method);
-                    //if (method.getParameterTypes().length == 1) {
-                    // System.err.println("type:" + method.getParameterTypes()[0]);
-                    //}
-                    //System.err.println("field:" + field.getClass());
-                    if (methodName.equals(method.getName()) && method.getParameterTypes().length == 1 /*&& method.getParameterTypes()[0].isAssignableFrom(field.getClass())*/) {
-                        method.invoke(value, field);
-                        break;
+                else if (field instanceof JSONArray) {
+                    // JSON array corresponds either to array type,  or  to some collection
+
+                    // we are interested in arrays
+                    if (clazz.isArray()) {
+                        //  is base class suitable?
+                        Class baseClass = retrieveArrayBase(clazz);
                     }
+                    //  TODO: implement collections (how???)
+
+                } else if (field instanceof JSONObject) {
+                    // JSON object means nested bean - process recusively
+                    method.invoke(value, unmarshall((JSONObject) field,clazz));
+
+                } else {
+                  
+                    // fallback here,  types not yet processed will be
+                    // set directly ( if possible )
+                    // TODO: guard this? for better leniency
+                    method.invoke(value, field);
                 }
+
             }
         }
         return value;
+    }
+
+    private static Method getCandidateMethod(Class clazz, String name) {
+        for (Method method : clazz.getMethods()) {
+            if (name.equals(method.getName()) && method.getParameterTypes().length == 1)
+                return method;
+        }
+        return null;
+    }
+
+    /**
+     * recursively retrieve base array class
+     *
+     * @param clazz
+     * @return
+     */
+    private static Class retrieveArrayBase(Class clazz) {
+        if (clazz.isArray())
+            return retrieveArrayBase(clazz.getComponentType());
+        return clazz;
     }
 
     /**

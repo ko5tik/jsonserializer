@@ -19,6 +19,7 @@ package de.pribluda.android.jsonmarshaller;
 
 import mockit.Expectations;
 import mockit.Mocked;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;
@@ -29,7 +30,6 @@ import java.util.Collections;
 import java.util.Iterator;
 
 import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertNull;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
@@ -143,7 +143,7 @@ public class JSONUnmarshallerTest {
      */
     @Test
     public void testThatStringIsUsedAsConstructorParameter() throws JSONException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
-        final Iterator keys = Arrays.asList(new String[]{"Integer"}).iterator();
+        final Iterator keys = Arrays.asList("Integer").iterator();
         new Expectations() {
             {
                 jsonObject.keys();
@@ -249,5 +249,71 @@ public class JSONUnmarshallerTest {
         WithInt withInteger = JSONUnmarshaller.unmarshall(jsonObject, WithInt.class);
 
         assertEquals(555, withInteger.getPrimitive());
+    }
+
+    /**
+     * primitive array field shall be unmarshalled
+     */
+    //@Test
+    public void testPrimitiveArrayUnmarshalling(@Mocked final JSONArray jsonArray) throws JSONException {
+        final Iterator keys = Arrays.asList(new String[]{"IntegerArray"}).iterator();
+        new Expectations() {
+            {
+                jsonObject.keys();
+                result = keys;
+                jsonObject.get("IntegerArray");
+                result = jsonArray;
+
+            }
+        };
+    }
+
+    public static class WithIntegerArray {
+        int[] array;
+
+        public void setIntegerArray(int[] array) {
+            this.array = array;
+        }
+
+        public int[] getIntegerArray() {
+            return array;
+        }
+    }
+
+    /**
+     * nested bean shall be parsed
+     */
+    @Test
+    public void testNestedBeanParsing() throws JSONException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+        final Iterator keys = Arrays.asList("WithInt").iterator();
+        final Iterator nestedKeys = Arrays.asList("Primitive").iterator();
+        new Expectations() {
+            {
+                jsonObject.keys(); result = keys;
+                jsonObject.get("WithInt"); result = jsonObject;
+                jsonObject.keys(); result = nestedKeys;
+                jsonObject.get("Primitive"); result = 239;
+            }
+        };
+        
+
+        WithNestedBean wnb = JSONUnmarshaller.unmarshall(jsonObject,WithNestedBean.class);
+        assertNotNull(wnb);
+        assertNotNull(wnb.getWithInt());
+        assertEquals(239, wnb.getWithInt().getPrimitive());
+    }
+
+
+
+    public static class WithNestedBean {
+        WithInt withInt;
+
+        public WithInt getWithInt() {
+            return withInt;
+        }
+
+        public void setWithInt(WithInt withInt) {
+            this.withInt = withInt;
+        }
     }
 }
