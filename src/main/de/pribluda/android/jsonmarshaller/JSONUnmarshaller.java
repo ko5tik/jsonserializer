@@ -22,8 +22,11 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.lang.reflect.Array;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 
@@ -98,19 +101,36 @@ public class JSONUnmarshaller {
                 else if (field instanceof JSONArray) {
                     // JSON array corresponds either to array type,  or  to some collection
 
-                    // we are interested in arrays
+                    // we are interested in arrays for now
                     if (clazz.isArray()) {
-                        //  is base class suitable?
+
+                        //  retrieve base class
                         Class baseClass = retrieveArrayBase(clazz);
+
+                        /*
+                        // determine array dimensions
+                        ArrayList<Integer> dimensions = new ArrayList<Integer>();
+                        recurseDimensions(dimensions, (JSONArray) field);
+                        int[] lengths = new int[dimensions.size()];
+                        int i = 0;
+                        for (int size : dimensions) {
+                            lengths[i++] = size;
+                        }
+                        Object fieldValue = Array.newInstance(baseClass, lengths);
+                        Array.newInstance(clazz.getComponentType(),)
+                        */
+                        // populate field value from JSON Array
+                        Object fieldValue = populateRecusrsive(clazz, (JSONArray) field);
+                        method.invoke(value, fieldValue);
                     }
                     //  TODO: implement collections (how???)
 
                 } else if (field instanceof JSONObject) {
                     // JSON object means nested bean - process recusively
-                    method.invoke(value, unmarshall((JSONObject) field,clazz));
+                    method.invoke(value, unmarshall((JSONObject) field, clazz));
 
                 } else {
-                  
+
                     // fallback here,  types not yet processed will be
                     // set directly ( if possible )
                     // TODO: guard this? for better leniency
@@ -122,6 +142,55 @@ public class JSONUnmarshaller {
         return value;
     }
 
+    /**
+     * recursively populate array out of hierarchy of JSON Objects
+     *
+     * @param baseClass  base class of array
+     * @param arrayClass original array class
+     * @param json       json object in question
+     * @return
+     */
+    private static Object populateRecusrsive(Class arrayClass, Object json) throws JSONException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+        if (arrayClass.isArray() && json instanceof JSONArray) {
+            final int length = ((JSONArray) json).length();
+            final Class componentType = arrayClass.getComponentType();
+            Object retval = Array.newInstance(componentType, length);
+            for (int i = 0; i < length; i++) {
+                Array.set(retval, i, populateRecusrsive(componentType, ((JSONArray) json).get(i)));
+            }
+            return retval;
+        } else {
+            // this is leaf object, JSON needs to be unmarshalled,
+            if (json instanceof JSONObject) {
+                return unmarshall((JSONObject) json, arrayClass);
+            } else {
+                // while all others can be returned verbatim
+                return json;
+            }
+        }
+
+    }
+
+    /**
+     * determine array dimenstions in recursive way
+     *
+     * @param dimensions
+     * @param jsonArray
+     */
+    private static void recurseDimensions(ArrayList<Integer> dimensions, JSONArray jsonArray) throws JSONException {
+        dimensions.add(jsonArray.length());
+        if (jsonArray.get(0) instanceof JSONArray) {
+
+        }
+    }
+
+    /**
+     * retrieve candidate setter method
+     *
+     * @param clazz
+     * @param name
+     * @return
+     */
     private static Method getCandidateMethod(Class clazz, String name) {
         for (Method method : clazz.getMethods()) {
             if (name.equals(method.getName()) && method.getParameterTypes().length == 1)

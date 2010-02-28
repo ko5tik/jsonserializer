@@ -253,32 +253,58 @@ public class JSONUnmarshallerTest {
 
     /**
      * primitive array field shall be unmarshalled
+     * TODO: improve test coverage
      */
-    //@Test
-    public void testPrimitiveArrayUnmarshalling(@Mocked final JSONArray jsonArray) throws JSONException {
-        final Iterator keys = Arrays.asList(new String[]{"IntegerArray"}).iterator();
+    @Test
+    public void testPrimitiveArrayUnmarshalling(@Mocked final JSONArray jsonArray) throws JSONException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+        final Iterator keys = Arrays.asList("IntegerArray").iterator();
         new Expectations() {
             {
-                jsonObject.keys();
-                result = keys;
-                jsonObject.get("IntegerArray");
-                result = jsonArray;
+                jsonObject.keys();result = keys;
+                jsonObject.get("IntegerArray");result = jsonArray;
+                jsonArray.length();result = 2;
+                //recursive parsing first nested array
+                jsonArray.get(0);result = jsonArray;
 
+                jsonArray.length();result = 2;
+                jsonArray.get(0);result = 1;
+                jsonArray.get(1);result = 2;
+                // recursive parsing second nested array
+                jsonArray.get(1);result = jsonArray;
+
+                jsonArray.length();result = 2;
+                jsonArray.get(0);result = 3;
+                jsonArray.get(1);result = 4;
             }
         };
+
+        WithIntegerArray wia = JSONUnmarshaller.unmarshall(jsonObject, WithIntegerArray.class);
+
+        assertNotNull(wia.getIntegerArray());
+        assertEquals(2, wia.getIntegerArray().length);
+        assertEquals(2, wia.getIntegerArray()[0].length);
+        assertEquals(2, wia.getIntegerArray()[1].length);
+
+        assertEquals(1, wia.getIntegerArray()[0][0]);
+        assertEquals(2, wia.getIntegerArray()[0][1]);
+        assertEquals(3, wia.getIntegerArray()[1][0]);
+        assertEquals(4, wia.getIntegerArray()[1][1]);
     }
 
     public static class WithIntegerArray {
-        int[] array;
+        int[][] array;
 
-        public void setIntegerArray(int[] array) {
+        public void setIntegerArray(int[][] array) {
             this.array = array;
         }
 
-        public int[] getIntegerArray() {
+        public int[][] getIntegerArray() {
             return array;
         }
     }
+
+
+  
 
     /**
      * nested bean shall be parsed
@@ -289,20 +315,23 @@ public class JSONUnmarshallerTest {
         final Iterator nestedKeys = Arrays.asList("Primitive").iterator();
         new Expectations() {
             {
-                jsonObject.keys(); result = keys;
-                jsonObject.get("WithInt"); result = jsonObject;
-                jsonObject.keys(); result = nestedKeys;
-                jsonObject.get("Primitive"); result = 239;
+                jsonObject.keys();
+                result = keys;
+                jsonObject.get("WithInt");
+                result = jsonObject;
+                jsonObject.keys();
+                result = nestedKeys;
+                jsonObject.get("Primitive");
+                result = 239;
             }
         };
-        
 
-        WithNestedBean wnb = JSONUnmarshaller.unmarshall(jsonObject,WithNestedBean.class);
+
+        WithNestedBean wnb = JSONUnmarshaller.unmarshall(jsonObject, WithNestedBean.class);
         assertNotNull(wnb);
         assertNotNull(wnb.getWithInt());
         assertEquals(239, wnb.getWithInt().getPrimitive());
     }
-
 
 
     public static class WithNestedBean {
