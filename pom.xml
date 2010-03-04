@@ -10,7 +10,7 @@
     </description>
     <inceptionYear>2010</inceptionYear>
     <scm>
-        <developerConnection>scm:git:git@github.com:ko5tik/jsonserializer.git</developerConnection>
+        <developerConnection>scm:git:git://github.com/ko5tik/jsonserializer.git</developerConnection>
         <connection>scm:git:http://github.com/ko5tik/jsonserializer.git</connection>
     </scm>
     <developers>
@@ -59,7 +59,7 @@
             <version>0.996</version>
             <scope>test</scope>
         </dependency>
-           <dependency>
+        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>4.7</version>
@@ -78,4 +78,23 @@
             <url>http://download.java.net/maven/2/</url>
         </repository>
     </repositories>
+    <distributionManagement>
+        <repository>
+            <uniqueVersion>false</uniqueVersion>
+            <id>jtec-private</id>
+            <name>J Tec Team maven repository on pribluda.de</name>
+            <url>dav:https://www.pribluda.de/dav/m2</url>
+        </repository>
+        <snapshotRepository>
+            <uniqueVersion>false</uniqueVersion>
+            <id>jtec-private</id>
+            <name>J Tec Team maven repository on pribluda.de</name>
+            <url>dav:https://www.pribluda.de/dav/m2</url>
+        </snapshotRepository>
+        <site>
+            <id>pribluda-private-site</id>
+            <name>J Tec Team site area on pribluda.de</name>
+            <url>dav:https://www.pribluda.de/dav/projects</url>
+        </site>
+    </distributionManagement>
 </project>
