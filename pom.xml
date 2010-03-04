@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>de.pribluda.android</groupId>
     <artifactId>jsonmarshaller</artifactId>
-    <version>0.2</version>
+    <version>0.3-SNAPSHOT</version>
     <url>http://www.sourceforge.net/projects/jtec</url>
     <description>
         Small json marshaller for POJOs to use in android
