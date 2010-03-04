@@ -9,8 +9,11 @@ Core features:
 
 Current state:
   - marshalls complete POJO trees
-  - unmarshalls POJOs with just primitives
-  - just enough for implementing highscore storage fo my android game (market://search?q=pname:de.pribluda.games.android.lines)
+  - understands arrays og POJO and primitives (even multidimensional)
+  - unmarshalls POJO trees,  with arrays of POJOS or primitives 
+  - no collection support yet due to lack of idea  how to determine 
+    object type from  JSON
+  - maven artifact deployed to my private reposotory at: http://www.pribluda.de/m2/
 
 Author(s)
   - Konstantin Pribluda (project founder)
