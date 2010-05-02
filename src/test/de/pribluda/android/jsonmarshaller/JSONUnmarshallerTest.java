@@ -235,7 +235,7 @@ public class JSONUnmarshallerTest {
      */
     @Test
     public void testIntegerPrimitiveSetting() throws JSONException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
-        final Iterator keys = Arrays.asList(new String[]{"Primitive"}).iterator();
+        final Iterator keys = Arrays.asList("Primitive").iterator();
         new Expectations() {
             {
                 jsonObject.keys();
@@ -260,21 +260,32 @@ public class JSONUnmarshallerTest {
         final Iterator keys = Arrays.asList("IntegerArray").iterator();
         new Expectations() {
             {
-                jsonObject.keys();result = keys;
-                jsonObject.get("IntegerArray");result = jsonArray;
-                jsonArray.length();result = 2;
+                jsonObject.keys();
+                result = keys;
+                jsonObject.get("IntegerArray");
+                result = jsonArray;
+                jsonArray.length();
+                result = 2;
                 //recursive parsing first nested array
-                jsonArray.get(0);result = jsonArray;
+                jsonArray.get(0);
+                result = jsonArray;
 
-                jsonArray.length();result = 2;
-                jsonArray.get(0);result = 1;
-                jsonArray.get(1);result = 2;
+                jsonArray.length();
+                result = 2;
+                jsonArray.get(0);
+                result = 1;
+                jsonArray.get(1);
+                result = 2;
                 // recursive parsing second nested array
-                jsonArray.get(1);result = jsonArray;
+                jsonArray.get(1);
+                result = jsonArray;
 
-                jsonArray.length();result = 2;
-                jsonArray.get(0);result = 3;
-                jsonArray.get(1);result = 4;
+                jsonArray.length();
+                result = 2;
+                jsonArray.get(0);
+                result = 3;
+                jsonArray.get(1);
+                result = 4;
             }
         };
 
@@ -303,8 +314,6 @@ public class JSONUnmarshallerTest {
         }
     }
 
-
-  
 
     /**
      * nested bean shall be parsed
@@ -344,5 +353,46 @@ public class JSONUnmarshallerTest {
         public void setWithInt(WithInt withInt) {
             this.withInt = withInt;
         }
+    }
+
+    /**
+     * if there is a field without corresponding setter, it has to be ignored.
+     */
+    @Test
+    public void testThatKeyWithoutSetterIsIgnoredSafely() throws InvocationTargetException, NoSuchMethodException, JSONException, InstantiationException, IllegalAccessException {
+        final Iterator keys = Arrays.asList("invalidKey").iterator();
+        new Expectations() {
+            {
+                jsonObject.keys();
+                result = keys;
+
+                jsonObject.get("invalidKey");
+                result = 444;
+            }
+        };
+
+        WithInt withInteger = JSONUnmarshaller.unmarshall(jsonObject, WithInt.class);
+        assertNotNull(withInteger);
+
+    }
+
+    /**
+     * both capitalisation forms must be allowed
+     */
+    @Test
+    public void testThatLowercasePropertyNamesAreRecognised() throws JSONException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+        final Iterator keys = Arrays.asList("primitive").iterator();
+        new Expectations() {
+            {
+                jsonObject.keys();
+                result = keys;
+                jsonObject.get("primitive");
+                result = 555;
+            }
+        };
+
+        WithInt withInteger = JSONUnmarshaller.unmarshall(jsonObject, WithInt.class);
+
+        assertEquals(555, withInteger.getPrimitive());
     }
 }

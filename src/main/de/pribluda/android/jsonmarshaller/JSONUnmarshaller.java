@@ -67,13 +67,18 @@ public class JSONUnmarshaller {
         while (keys.hasNext()) {
             String key = (String) keys.next();
             Object field = jsonObject.get(key);
-            String methodName = SETTER_PREFIX + key;
+
+            //  capitalise to standard setter pattern
+            String methodName = SETTER_PREFIX + key.substring(0, 1).toUpperCase() + key.substring(1);
+
+            System.err.println("method name:" + methodName);
 
             Method method = getCandidateMethod(beanToBeCreatedClass, methodName);
 
-            Class clazz = method.getParameterTypes()[0];
 
             if (method != null) {
+                Class clazz = method.getParameterTypes()[0];
+
                 // discriminate based on type
                 if (field instanceof String) {
 
@@ -137,6 +142,8 @@ public class JSONUnmarshaller {
                     method.invoke(value, field);
                 }
 
+            } else {
+                System.err.println("ignore json property:" + key);
             }
         }
         return value;
@@ -145,7 +152,6 @@ public class JSONUnmarshaller {
     /**
      * recursively populate array out of hierarchy of JSON Objects
      *
-     * @param baseClass  base class of array
      * @param arrayClass original array class
      * @param json       json object in question
      * @return
@@ -173,6 +179,7 @@ public class JSONUnmarshaller {
 
     /**
      * determine array dimenstions in recursive way
+     * TODO: do we need this at all?
      *
      * @param dimensions
      * @param jsonArray
