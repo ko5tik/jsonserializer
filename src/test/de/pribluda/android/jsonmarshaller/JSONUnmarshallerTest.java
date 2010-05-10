@@ -30,6 +30,7 @@ import java.util.Collections;
 import java.util.Iterator;
 
 import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertTrue;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
@@ -177,7 +178,7 @@ public class JSONUnmarshallerTest {
      * string shjall be also converted to integer
      * TODO: investigate if we really need this feature
      */
-
+    @Test
     public void testThatStringIsUsedAsPrimitive() throws JSONException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
         final Iterator keys = Arrays.asList(new String[]{"Primitive"}).iterator();
         new Expectations() {
@@ -249,6 +250,37 @@ public class JSONUnmarshallerTest {
         WithInt withInteger = JSONUnmarshaller.unmarshall(jsonObject, WithInt.class);
 
         assertEquals(555, withInteger.getPrimitive());
+    }
+
+    @Test
+    public void testThatObjectBooleanIsSet() throws JSONException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+        final Iterator keys = Arrays.asList("bool").iterator();
+        new Expectations() {
+            {
+                jsonObject.keys();
+                result = keys;
+                jsonObject.get("bool");
+                result = Boolean.TRUE;
+
+            }
+        };
+
+        WithBoolean withInteger = JSONUnmarshaller.unmarshall(jsonObject, WithBoolean.class);
+
+        assertTrue( withInteger.getBool());
+
+    }
+
+    public static class WithBoolean {
+        Boolean bool;
+
+        public Boolean getBool() {
+            return bool;
+        }
+
+        public void setBool(Boolean bool) {
+            this.bool = bool;
+        }
     }
 
     /**

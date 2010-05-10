@@ -1,5 +1,6 @@
 package de.pribluda.android.jsonmarshaller;
 
+import android.R;
 import mockit.Expectations;
 import mockit.Mocked;
 import mockit.Verifications;
@@ -30,6 +31,7 @@ public class JSONMarshallerTest {
         assertEquals("Foo", JSONMarshaller.propertize("getFoo"));
         assertEquals("fooBar", JSONMarshaller.propertize("getfooBar"));
         assertEquals("F", JSONMarshaller.propertize("getF"));
+        assertEquals("Foo", JSONMarshaller.propertize("isFoo"));
     }
 
     /**
@@ -277,14 +279,14 @@ public class JSONMarshallerTest {
                 new JSONObject();
 
                 // and serialize aeeay
-                  // shall create JSON array
+                // shall create JSON array
                 JSONArray first = new JSONArray();
                 // and put values there
-                first.put((Object)1);
-                first.put((Object)2);
-                first.put((Object)3);
+                first.put((Object) 1);
+                first.put((Object) 2);
+                first.put((Object) 3);
 
-                jsonObject.put("IntArray",first);
+                jsonObject.put("IntArray", first);
             }
         };
         assertNotNull(JSONMarshaller.marshall(new WithArray()));
@@ -293,6 +295,70 @@ public class JSONMarshallerTest {
     public static class WithArray {
         public int[] getIntArray() {
             return singleDimension;
+        }
+    }
+
+    /**
+     * primitive boolean with is-getter shall be marshalled
+     */
+    @Test
+    public void testThatPrimitiveBooleanWithIsIsMarshalled() throws InvocationTargetException, NoSuchMethodException, JSONException, IllegalAccessException {
+
+        (new JSONMarshaller()).marshall(new WithPrimitiveBoolean());
+        new Verifications() {
+            {
+                jsonObject.put("Bool", (Object) true);
+            }
+        };
+    }
+
+    public static class WithPrimitiveBoolean {
+
+        public boolean isBool() {
+            return true;
+        }
+    }
+
+
+    /**
+     * primitive boolean with is-getter shall be marshalled
+     */
+    @Test
+    public void testThatPrimitiveBooleanWithGetIsMarshalled() throws InvocationTargetException, NoSuchMethodException, JSONException, IllegalAccessException {
+
+        (new JSONMarshaller()).marshall(new WithPrimitiveGetBoolean());
+        new Verifications() {
+            {
+                jsonObject.put("Bool", (Object) true);
+            }
+        };
+    }
+
+    public static class WithPrimitiveGetBoolean {
+
+        public boolean getBool() {
+            return true;
+        }
+    }
+
+    /**
+     * primitive boolean with is-getter shall be marshalled
+     */
+    @Test
+    public void testThatObjectBooleanWithGetIsMarshalled() throws InvocationTargetException, NoSuchMethodException, JSONException, IllegalAccessException {
+
+        (new JSONMarshaller()).marshall(new WithPrimitiveGetBoolean());
+        new Verifications() {
+            {
+                jsonObject.put("Bool", (Object) true);
+            }
+        };
+    }
+
+    public static class WithObjectGetBoolean {
+
+        public Boolean getBool() {
+            return true;
         }
     }
 }
