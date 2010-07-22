@@ -96,5 +96,5 @@
             <name>J Tec Team site area on pribluda.de</name>
             <url>dav:https://www.pribluda.de/dav/projects</url>
         </site>
-    </distributionManagement>
+    </distributionManagement>    
 </project>
