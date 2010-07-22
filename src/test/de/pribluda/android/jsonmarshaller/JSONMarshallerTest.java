@@ -1,6 +1,6 @@
 package de.pribluda.android.jsonmarshaller;
 
-import android.R;
+
 import mockit.Expectations;
 import mockit.Mocked;
 import mockit.Verifications;
@@ -9,7 +9,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;
 
-import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
 import static junit.framework.Assert.assertEquals;
@@ -360,5 +359,23 @@ public class JSONMarshallerTest {
         public Boolean getBool() {
             return true;
         }
+    }
+
+
+    /**
+     * inherited entities shall be taken into account
+      */
+    @Test
+    public void testThatInheritedPropertiesAreUsed() throws InvocationTargetException, NoSuchMethodException, JSONException, IllegalAccessException {
+          (new JSONMarshaller()).marshall(new Derived());
+        new Verifications() {
+            {
+                jsonObject.put("Bool", (Object) true);
+            }
+        };
+    }
+
+    public static class Derived extends WithPrimitiveGetBoolean {
+
     }
 }

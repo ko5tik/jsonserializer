@@ -64,7 +64,7 @@ public class JSONMarshaller {
         if (object.getClass().isPrimitive())
             return;
         // object not null,  and is not primitive - iterate through getters
-        for (Method method : object.getClass().getDeclaredMethods()) {
+        for (Method method : object.getClass().getMethods()) {
             //System.err.println("method:" + method);
             // our getters are parameterless and start with "get"
             if ((method.getName().startsWith(GETTER_PREFIX) && method.getName().length() > BEGIN_INDEX || method.getName().startsWith(IS_PREFIX) && method.getName().length() > IS_LENGTH) && (method.getModifiers() & Modifier.PUBLIC) != 0 && method.getParameterTypes().length == 0 && method.getReturnType() != void.class) {

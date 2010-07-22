@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>de.pribluda.android</groupId>
     <artifactId>jsonmarshaller</artifactId>
-    <version>0.3-SNAPSHOT</version>
+    <version>0.4-SNAPSHOT</version>
     <url>http://www.sourceforge.net/projects/jtec</url>
     <description>
         Small json marshaller for POJOs to use in android
@@ -66,9 +66,9 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>android</groupId>
-            <artifactId>android</artifactId>
-            <version>1.5</version>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20090211</version>
         </dependency>
     </dependencies>
     <repositories>
@@ -96,5 +96,5 @@
             <name>J Tec Team site area on pribluda.de</name>
             <url>dav:https://www.pribluda.de/dav/projects</url>
         </site>
-    </distributionManagement>    
+    </distributionManagement>
 </project>
