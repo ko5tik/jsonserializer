@@ -25,8 +25,8 @@
         </developer>
     </developers>
     <build>
-        <sourceDirectory>${basedir}/src/main</sourceDirectory>
-        <testSourceDirectory>${basedir}/src/test</testSourceDirectory>
+        <sourceDirectory>src/main</sourceDirectory>
+        <testSourceDirectory>src/test</testSourceDirectory>
         <plugins>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
