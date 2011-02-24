@@ -66,9 +66,9 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.json</groupId>
-            <artifactId>json</artifactId>
-            <version>20090211</version>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>1.7-SNAPSHOT</version>
         </dependency>
     </dependencies>
     <repositories>
@@ -76,6 +76,11 @@
             <id>m2-repo-java-net</id>
             <name>M2 repository @ java.net</name>
             <url>http://download.java.net/maven/2/</url>
+        </repository>
+        <repository>
+            <id>google-code</id>
+            <name>M2 repository @ google code</name>
+            <url>http://google-gson.googlecode.com/svn/mavenrepo/</url>
         </repository>
     </repositories>
     <distributionManagement>

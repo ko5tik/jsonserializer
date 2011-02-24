@@ -18,9 +18,7 @@
 package de.pribluda.android.jsonmarshaller;
 
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.google.gson.stream.JsonReader;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
@@ -48,18 +46,17 @@ public class JSONUnmarshaller {
     /**
      * TODO: provide support for nested JSON objects
      * TODO: provide support for embedded JSON Arrays
-     *
-     * @param jsonObject
+
      * @param beanToBeCreatedClass
      * @param <T>
      * @return
      * @throws IllegalAccessException
      * @throws InstantiationException
-     * @throws JSONException
+
      * @throws NoSuchMethodException
      * @throws InvocationTargetException
      */
-    public static <T> T unmarshall(JSONObject jsonObject, java.lang.Class<T> beanToBeCreatedClass) throws IllegalAccessException, InstantiationException, JSONException, NoSuchMethodException, InvocationTargetException {
+    public static <T> T unmarshall(JsonReader reader, java.lang.Class<T> beanToBeCreatedClass) throws IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
         T value = beanToBeCreatedClass.getConstructor().newInstance();
 
         Iterator keys = jsonObject.keys();
