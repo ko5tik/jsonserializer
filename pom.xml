@@ -3,8 +3,8 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>de.pribluda.android</groupId>
     <artifactId>jsonmarshaller</artifactId>
-    <version>0.4-SNAPSHOT</version>
-    <url>http://www.sourceforge.net/projects/jtec</url>
+    <version>0.5-SNAPSHOT</version>
+    <url>https://github.com/ko5tik/jsonserializer</url>
     <description>
         Small json marshaller for POJOs to use in android
     </description>

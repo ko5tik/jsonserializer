@@ -17,17 +17,13 @@
 
 package de.pribluda.android.jsonmarshaller;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
-import java.io.Writer;
+import com.google.gson.stream.JsonWriter;
+
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.Date;
-import java.util.HashMap;
 
 /**
  * marshall beans to JSON into writer
@@ -44,19 +40,18 @@ public class JSONMarshaller {
      * @param object
      * @return
      */
-    public static JSONObject marshall(Object object) throws InvocationTargetException, JSONException, IllegalAccessException, NoSuchMethodException {
-        JSONObject retval = new JSONObject();
-        marshallRecursive(retval, object);
-        return retval;
+    public static void marshall(JsonWriter writer, Object object) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
+
+        marshallRecursive(writer, object);
+
     }
 
     /**
-     * recursively marshall to JSON
+     * recursively marshall to JSON writer
      *
-     * @param sink
      * @param object
      */
-    static void marshallRecursive(JSONObject sink, Object object) throws JSONException, InvocationTargetException, IllegalAccessException, NoSuchMethodException {
+    static void marshallRecursive(JsonWriter writer, Object object) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
         // nothing to marshall
         if (object == null)
             return;
@@ -74,16 +69,16 @@ public class JSONMarshaller {
                     //System.err.println("passed primitive");
                     // it is, marshall it
                     //    System.err.println("marshall primitive " + method.getName() + "/" + method.invoke(object));
-                    sink.put(propertize(method.getName()), method.invoke(object));
+                    //         sink.put(propertize(method.getName()), method.invoke(object));
                     continue;
                 } else if (type.isArray()) {
-                    sink.put(propertize(method.getName()), marshallArray(method.invoke(object)));
+                    //         sink.put(propertize(method.getName()), marshallArray(method.invoke(object)));
                     continue;
                 } else {
                     // does it have default constructor?
                     try {
                         if (method.getReturnType().getConstructor() != null) {
-                            sink.put(propertize(method.getName()), marshall(method.invoke(object)));
+                            //                sink.put(propertize(method.getName()), marshall(method.invoke(object)));
                             continue;
                         }
                     } catch (NoSuchMethodException ex) {
@@ -100,21 +95,21 @@ public class JSONMarshaller {
      * @param array
      * @return
      */
-    static JSONArray marshallArray(Object array) throws InvocationTargetException, NoSuchMethodException, JSONException, IllegalAccessException {
+    static void marshallArray(JsonWriter sink, Object array) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
         if (array.getClass().isArray()) {
             Class componentType = array.getClass().getComponentType();
-            JSONArray retval = new JSONArray();
+            //  JSONArray retval = new JSONArray();
             final int arrayLength = Array.getLength(array);
             // stirngs and primitives must be marshalled directly
             if (componentType.isPrimitive() || String.class.equals(componentType)) {
 
                 for (int i = 0; i < arrayLength; i++) {
-                    retval.put(Array.get(array, i));
+                    //   retval.put(Array.get(array, i));
                 }
             } else if (componentType.isArray()) {
                 // that's cool, nested array recurse
                 for (int i = 0; i < arrayLength; i++) {
-                    retval.put(marshallArray(Array.get(array, i)));
+                    //   retval.put(marshallArray(Array.get(array, i)));
                 }
             } else {
                 // treat component as a bean   if it got default constructor
@@ -122,7 +117,7 @@ public class JSONMarshaller {
                     //System.err.println("determining default constructor:" + componentType.getConstructor());
                     if (componentType.getConstructor() != null) {
                         for (int i = 0; i < arrayLength; i++) {
-                            retval.put(marshall(Array.get(array, i)));
+                            //    retval.put(marshall(Array.get(array, i)));
                         }
                     }
                 } catch (NoSuchMethodException ex) {
@@ -130,10 +125,8 @@ public class JSONMarshaller {
                 }
             }
 
-            return retval;
-        }
 
-        return null;
+        }
     }
 
     /**

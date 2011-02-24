@@ -20,12 +20,10 @@ package de.pribluda.android.jsonmarshaller;
 
 import com.google.gson.stream.JsonReader;
 
-import java.lang.reflect.Array;
+import java.io.StringReader;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 
 /**
  * performs unmarshalling of JSON data creating objects
@@ -46,103 +44,93 @@ public class JSONUnmarshaller {
     /**
      * TODO: provide support for nested JSON objects
      * TODO: provide support for embedded JSON Arrays
-
+     *
      * @param beanToBeCreatedClass
      * @param <T>
      * @return
      * @throws IllegalAccessException
      * @throws InstantiationException
-
      * @throws NoSuchMethodException
      * @throws InvocationTargetException
      */
     public static <T> T unmarshall(JsonReader reader, java.lang.Class<T> beanToBeCreatedClass) throws IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
         T value = beanToBeCreatedClass.getConstructor().newInstance();
+        /*
+Iterator keys = jsonObject.keys();
+while (keys.hasNext()) {
+String key = (String) keys.next();
+Object field = jsonObject.get(key);
 
-        Iterator keys = jsonObject.keys();
-        while (keys.hasNext()) {
-            String key = (String) keys.next();
-            Object field = jsonObject.get(key);
+//  capitalise to standard setter pattern
+String methodName = SETTER_PREFIX + key.substring(0, 1).toUpperCase() + key.substring(1);
 
-            //  capitalise to standard setter pattern
-            String methodName = SETTER_PREFIX + key.substring(0, 1).toUpperCase() + key.substring(1);
+//System.err.println("method name:" + methodName);
 
-            //System.err.println("method name:" + methodName);
-
-            Method method = getCandidateMethod(beanToBeCreatedClass, methodName);
+Method method = getCandidateMethod(beanToBeCreatedClass, methodName);
 
 
-            if (method != null) {
-                Class clazz = method.getParameterTypes()[0];
+if (method != null) {
+    Class clazz = method.getParameterTypes()[0];
 
-                // discriminate based on type
-                if (field instanceof String) {
+    // discriminate based on type
+    if (field instanceof String) {
 
-                    // string shall be used directly, either to set or as constructor parameter (if suitable)
-                    try {
+        // string shall be used directly, either to set or as constructor parameter (if suitable)
+        try {
 
-                        beanToBeCreatedClass.getMethod(methodName, String.class).invoke(value, field);
-                        continue;
-                    } catch (NoSuchMethodException e) {
-                        // that means there was no such method, proceed
-                    }
-                    // or maybe there is method with suitable parameter?
-                    if (clazz.isPrimitive() && primitves.get(clazz) != null) {
-                        //System.err.println("... primitive found");
-                        clazz = primitves.get(clazz);
-                    }
-                    try {
-                        method.invoke(value, clazz.getConstructor(String.class).newInstance(field));
-                    } catch (NoSuchMethodException nsme) {
-                        // we are failed here,  but so what? be lenient
-                    }
-
-                }
-                // we are done with string
-                else if (field instanceof JSONArray) {
-                    // JSON array corresponds either to array type,  or  to some collection
-
-                    // we are interested in arrays for now
-                    if (clazz.isArray()) {
-
-                        //  retrieve base class
-                        Class baseClass = retrieveArrayBase(clazz);
-
-                        /*
-                        // determine array dimensions
-                        ArrayList<Integer> dimensions = new ArrayList<Integer>();
-                        recurseDimensions(dimensions, (JSONArray) field);
-                        int[] lengths = new int[dimensions.size()];
-                        int i = 0;
-                        for (int size : dimensions) {
-                            lengths[i++] = size;
-                        }
-                        Object fieldValue = Array.newInstance(baseClass, lengths);
-                        Array.newInstance(clazz.getComponentType(),)
-                        */
-                        // populate field value from JSON Array
-                        Object fieldValue = populateRecusrsive(clazz, (JSONArray) field);
-                        method.invoke(value, fieldValue);
-                    }
-                    //  TODO: implement collections (how???)
-
-                } else if (field instanceof JSONObject) {
-                    // JSON object means nested bean - process recusively
-                    method.invoke(value, unmarshall((JSONObject) field, clazz));
-
-                } else {
-
-                    // fallback here,  types not yet processed will be
-                    // set directly ( if possible )
-                    // TODO: guard this? for better leniency
-                    method.invoke(value, field);
-                }
-
-            } else {
-                System.err.println("ignore json property:" + key);
-            }
+            beanToBeCreatedClass.getMethod(methodName, String.class).invoke(value, field);
+            continue;
+        } catch (NoSuchMethodException e) {
+            // that means there was no such method, proceed
         }
+        // or maybe there is method with suitable parameter?
+        if (clazz.isPrimitive() && primitves.get(clazz) != null) {
+            //System.err.println("... primitive found");
+            clazz = primitves.get(clazz);
+        }
+        try {
+            method.invoke(value, clazz.getConstructor(String.class).newInstance(field));
+        } catch (NoSuchMethodException nsme) {
+            // we are failed here,  but so what? be lenient
+        }
+
+    }
+    // we are done with string
+    else if (field instanceof JSONArray) {
+        // JSON array corresponds either to array type,  or  to some collection
+
+        // we are interested in arrays for now
+        if (clazz.isArray()) {
+
+            //  retrieve base class
+            Class baseClass = retrieveArrayBase(clazz);
+
+
+            // populate field value from JSON Array
+            Object fieldValue = populateRecusrsive(clazz, (JSONArray) field);
+            method.invoke(value, fieldValue);
+        }
+        //  TODO: implement collections (how???)
+
+    } else if (field instanceof JSONObject) {
+        // JSON object means nested bean - process recusively
+        method.invoke(value, unmarshall((JSONObject) field, clazz));
+
+    } else {
+
+        // fallback here,  types not yet processed will be
+        // set directly ( if possible )
+        // TODO: guard this? for better leniency
+        method.invoke(value, field);
+    }
+
+} else {
+    System.err.println("ignore json property:" + key);
+}
+}
+        */
         return value;
+
     }
 
     /**
@@ -152,7 +140,8 @@ public class JSONUnmarshaller {
      * @param json       json object in question
      * @return
      */
-    private static Object populateRecusrsive(Class arrayClass, Object json) throws JSONException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+    private static Object populateRecusrsive(Class arrayClass, Object json) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+        /*
         if (arrayClass.isArray() && json instanceof JSONArray) {
             final int length = ((JSONArray) json).length();
             final Class componentType = arrayClass.getComponentType();
@@ -170,7 +159,8 @@ public class JSONUnmarshaller {
                 return json;
             }
         }
-
+          */
+        return null;
     }
 
     /**
@@ -180,12 +170,14 @@ public class JSONUnmarshaller {
      * @param dimensions
      * @param jsonArray
      */
-    private static void recurseDimensions(ArrayList<Integer> dimensions, JSONArray jsonArray) throws JSONException {
+    /*
+    private static void recurseDimensions(ArrayList<Integer> dimensions, JSONArray jsonArray) {
         dimensions.add(jsonArray.length());
         if (jsonArray.get(0) instanceof JSONArray) {
 
         }
     }
+    */
 
     /**
      * retrieve candidate setter method
@@ -223,11 +215,10 @@ public class JSONUnmarshaller {
      * @return
      * @throws InvocationTargetException
      * @throws NoSuchMethodException
-     * @throws JSONException
      * @throws InstantiationException
      * @throws IllegalAccessException
      */
-    public static <T> T unmarshall(String json, java.lang.Class<T> beanToBeCreatedClass) throws InvocationTargetException, NoSuchMethodException, JSONException, InstantiationException, IllegalAccessException {
-        return unmarshall(new JSONObject(json), beanToBeCreatedClass);
+    public static <T> T unmarshall(String json, java.lang.Class<T> beanToBeCreatedClass) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+        return unmarshall(new JsonReader(new StringReader(json)), beanToBeCreatedClass);
     }
 }
