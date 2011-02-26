@@ -20,9 +20,13 @@ package de.pribluda.android.jsonmarshaller;
 
 import com.google.gson.stream.JsonReader;
 
+import java.io.IOException;
 import java.io.StringReader;
+import java.lang.reflect.Array;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
@@ -53,131 +57,177 @@ public class JSONUnmarshaller {
      * @throws NoSuchMethodException
      * @throws InvocationTargetException
      */
-    public static <T> T unmarshall(JsonReader reader, java.lang.Class<T> beanToBeCreatedClass) throws IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
-        T value = beanToBeCreatedClass.getConstructor().newInstance();
-        /*
-Iterator keys = jsonObject.keys();
-while (keys.hasNext()) {
-String key = (String) keys.next();
-Object field = jsonObject.get(key);
+    public static <T> T unmarshall(JsonReader reader, java.lang.Class<T> beanToBeCreatedClass) throws IOException, NoSuchMethodException, InvocationTargetException, IllegalAccessException, InstantiationException {
+        // nothing there - bail out
+        reader.beginObject();
 
-//  capitalise to standard setter pattern
-String methodName = SETTER_PREFIX + key.substring(0, 1).toUpperCase() + key.substring(1);
+        if (reader.peek() == null) {
 
-//System.err.println("method name:" + methodName);
-
-Method method = getCandidateMethod(beanToBeCreatedClass, methodName);
-
-
-if (method != null) {
-    Class clazz = method.getParameterTypes()[0];
-
-    // discriminate based on type
-    if (field instanceof String) {
-
-        // string shall be used directly, either to set or as constructor parameter (if suitable)
-        try {
-
-            beanToBeCreatedClass.getMethod(methodName, String.class).invoke(value, field);
-            continue;
-        } catch (NoSuchMethodException e) {
-            // that means there was no such method, proceed
+            return null;
         }
+        T value = beanToBeCreatedClass.getConstructor().newInstance();
+        while (reader.hasNext()) {
+            String key = reader.nextName();
+
+
+            //  capitalise to standard setter pattern
+            String methodName = SETTER_PREFIX + key.substring(0, 1).toUpperCase() + key.substring(1);
+
+
+            Method method = getCandidateMethod(beanToBeCreatedClass, methodName);
+
+            // must be kind of setter method
+            if (method != null && method.getParameterTypes().length == 1) {
+                Class clazz = method.getParameterTypes()[0];
+                // as we have setter, we can process value
+                Object v = unmarshalValue(reader, clazz);
+                System.err.println("class to set:" + clazz);
+                System.err.println("value:" + v);
+                // can we use setter method directly?
+                if (clazz.isAssignableFrom(v.getClass())) {
+                    method.invoke(value, v);
+                    continue;
+                } else {
+                    System.err.println("... not assignable");
+                }
+                Object obj = convertToObject(clazz, v);
+                if (obj != null)
+                    method.invoke(value, obj);
+            } else {
+                // no suitable method was found - skip this value altogether
+                reader.skipValue();
+            }
+        }
+
+
+        reader.endObject();
+
+        return value;
+
+    }
+
+    private static <T> Object convertToObject(Class clazz, Object v) throws InstantiationException, IllegalAccessException, InvocationTargetException {
         // or maybe there is method with suitable parameter?
         if (clazz.isPrimitive() && primitves.get(clazz) != null) {
             //System.err.println("... primitive found");
             clazz = primitves.get(clazz);
         }
+        Constructor constructor = null;
         try {
-            method.invoke(value, clazz.getConstructor(String.class).newInstance(field));
+            constructor = clazz.getConstructor(v.getClass());
         } catch (NoSuchMethodException nsme) {
-            // we are failed here,  but so what? be lenient
+            // we are failed here,  but so what? be lenient  and ignore this
+            return null;
         }
-
-    }
-    // we are done with string
-    else if (field instanceof JSONArray) {
-        // JSON array corresponds either to array type,  or  to some collection
-
-        // we are interested in arrays for now
-        if (clazz.isArray()) {
-
-            //  retrieve base class
-            Class baseClass = retrieveArrayBase(clazz);
-
-
-            // populate field value from JSON Array
-            Object fieldValue = populateRecusrsive(clazz, (JSONArray) field);
-            method.invoke(value, fieldValue);
+        Object obj = null;
+        try {
+            obj = constructor.newInstance(v);
+        } catch (Exception e) {
+            // we can not instantiate - so what...
         }
-        //  TODO: implement collections (how???)
-
-    } else if (field instanceof JSONObject) {
-        // JSON object means nested bean - process recusively
-        method.invoke(value, unmarshall((JSONObject) field, clazz));
-
-    } else {
-
-        // fallback here,  types not yet processed will be
-        // set directly ( if possible )
-        // TODO: guard this? for better leniency
-        method.invoke(value, field);
+        return obj;
     }
 
-} else {
-    System.err.println("ignore json property:" + key);
-}
-}
-        */
+    /**
+     * unmarshal current value, possibly walking down the three
+     *
+     * @param reader
+     * @return
+     * @throws IOException
+     * @throws IllegalAccessException
+     * @throws InvocationTargetException
+     * @throws InstantiationException
+     * @throws NoSuchMethodException
+     */
+    private static Object unmarshalValue(JsonReader reader, Class clazz) throws IOException, IllegalAccessException, InvocationTargetException, InstantiationException, NoSuchMethodException {
+
+        Object value = null;
+
+        switch (reader.peek()) {
+            case STRING:
+            case NUMBER:
+                // process string
+                System.err.println("processing string");
+                value = reader.nextString();
+                break;
+            case BOOLEAN:
+                value = reader.nextBoolean();
+                break;
+            case BEGIN_ARRAY:
+                //  we are interested in arrays
+                if (clazz.isArray()) {
+                    System.err.println("... is array");
+
+                    // populate field value from JSON Array
+                    value = populateRecusrsive(clazz, reader);
+                } else {
+                    reader.skipValue();
+                }
+                break;
+            case BEGIN_OBJECT:
+                // so, we are unmarshalling nested object - recyrse
+                value = unmarshall(reader,clazz);
+                break;
+            default:
+                // do not know what to do with it,  skip
+                reader.skipValue();
+        }
+
         return value;
-
     }
 
     /**
      * recursively populate array out of hierarchy of JSON Objects
      *
      * @param arrayClass original array class
-     * @param json       json object in question
+     * @param reader     reader to be processed
      * @return
      */
-    private static Object populateRecusrsive(Class arrayClass, Object json) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
-        /*
-        if (arrayClass.isArray() && json instanceof JSONArray) {
-            final int length = ((JSONArray) json).length();
+    private static Object populateRecusrsive(Class arrayClass, JsonReader reader) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, IOException {
+        System.err.println("recursive populating " + arrayClass);
+        ArrayList value = new ArrayList();
+        Object retval = null;
+        reader.beginArray();
+        if (arrayClass.isArray()) {
+            // create list, as we do not know size yet
+
+
             final Class componentType = arrayClass.getComponentType();
-            Object retval = Array.newInstance(componentType, length);
-            for (int i = 0; i < length; i++) {
-                Array.set(retval, i, populateRecusrsive(componentType, ((JSONArray) json).get(i)));
+            // iterate over reader
+            while (reader.hasNext()) {
+                Object component;
+                if (componentType.isArray()) {
+                    // component is array - dive down
+                    component = populateRecusrsive(componentType, reader);
+                    if (component != null) {
+                        value.add(component);
+                    }
+                } else {
+                    // component is leaf,
+                    Object leaf = unmarshalValue(reader, componentType);
+                    Object obj = convertToObject(componentType, leaf);
+                    System.err.println("converted to class:" + obj);
+                    if (obj != null) {
+                        System.err.println("... add to list");
+                        value.add(obj);
+                    }
+                }
             }
-            return retval;
+            // copy everything to array,
+            System.err.println("creating array of size:" + value.size());
+            retval = Array.newInstance(componentType, value.size());
+            for (int i = 0; i < value.size(); i++) {
+                Array.set(retval, i, value.get(i));
+            }
         } else {
-            // this is leaf object, JSON needs to be unmarshalled,
-            if (json instanceof JSONObject) {
-                return unmarshall((JSONObject) json, arrayClass);
-            } else {
-                // while all others can be returned verbatim
-                return json;
-            }
+            return null;
         }
-          */
-        return null;
-    }
+        reader.endArray();
 
-    /**
-     * determine array dimenstions in recursive way
-     * TODO: do we need this at all?
-     *
-     * @param dimensions
-     * @param jsonArray
-     */
-    /*
-    private static void recurseDimensions(ArrayList<Integer> dimensions, JSONArray jsonArray) {
-        dimensions.add(jsonArray.length());
-        if (jsonArray.get(0) instanceof JSONArray) {
 
-        }
+        System.err.println("array processing ends" + retval);
+        return retval;
     }
-    */
 
     /**
      * retrieve candidate setter method
@@ -194,17 +244,6 @@ if (method != null) {
         return null;
     }
 
-    /**
-     * recursively retrieve base array class
-     *
-     * @param clazz
-     * @return
-     */
-    private static Class retrieveArrayBase(Class clazz) {
-        if (clazz.isArray())
-            return retrieveArrayBase(clazz.getComponentType());
-        return clazz;
-    }
 
     /**
      * convenience method parsing JSON on the fly
@@ -218,7 +257,7 @@ if (method != null) {
      * @throws InstantiationException
      * @throws IllegalAccessException
      */
-    public static <T> T unmarshall(String json, java.lang.Class<T> beanToBeCreatedClass) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+    public static <T> T unmarshall(String json, java.lang.Class<T> beanToBeCreatedClass) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, IOException {
         return unmarshall(new JsonReader(new StringReader(json)), beanToBeCreatedClass);
     }
 }

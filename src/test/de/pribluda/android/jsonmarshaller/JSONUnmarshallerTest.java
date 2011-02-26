@@ -18,44 +18,44 @@
 package de.pribluda.android.jsonmarshaller;
 
 import com.google.gson.stream.JsonReader;
-import mockit.Expectations;
-import mockit.Mocked;
 import org.junit.Test;
 
+import java.io.IOException;
+import java.io.StringReader;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Iterator;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertTrue;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 /**
  * test capabilities of JSON unmarshaler
  */
 public class JSONUnmarshallerTest {
-    @Mocked
+
     JsonReader source;
 
+    /**
+     *
+     */
+    @Test
+    public void testEmptyJsonCreatesNothing() throws InvocationTargetException, IOException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+        try {
+            source = new JsonReader(new StringReader(""));
+            JSONUnmarshaller.unmarshall(source, BeanToBeCreated.class);
+            fail("must bomb with exception");
+        } catch (IOException e) {
+            // anticipated
+        }
+
+    }
 
     /**
      * object of proper class shall be created via default constructor
      */
     @Test
-    public void testObjectCreation(@Mocked final BeanToBeCreated btc) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+    public void testObjectCreation() throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, IOException {
+        source = new JsonReader(new StringReader("{}"));
 
-        new Expectations() {
-            {
-
-                new BeanToBeCreated();
-
-                result = Collections.EMPTY_LIST.iterator();
-            }
-        };
-
-        JSONUnmarshaller.unmarshall(source, BeanToBeCreated.class);
+        assertNotNull(JSONUnmarshaller.unmarshall(source, BeanToBeCreated.class));
     }
     // just a bean with default constructor,  nothing else
 
@@ -67,8 +67,9 @@ public class JSONUnmarshallerTest {
      * no default constructor -no party
      */
     @Test
-    public void testThatNotABeanIsBombed() throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+    public void testThatNotABeanIsBombed() throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, IOException {
         try {
+            source = new JsonReader(new StringReader("{}"));
             JSONUnmarshaller.unmarshall(source, BeanWithoutDefaultConstructor.class);
             fail("has to bomb on absent defaut constructor");
         } catch (NoSuchMethodException ex) {
@@ -88,8 +89,9 @@ public class JSONUnmarshallerTest {
      * shall bomb on not accesible default constructor
      */
     @Test
-    public void testThatNotAccessibleDefaultConstructorIsBombed() throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+    public void testThatNotAccessibleDefaultConstructorIsBombed() throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, IOException {
         try {
+            source = new JsonReader(new StringReader("{}"));
             JSONUnmarshaller.unmarshall(source, BeanWithNotAccesibleDefaultConstructor.class);
             fail("I have expected exceptio here because  default consstructor was quite provate");
         } catch (NoSuchMethodException ex) {
@@ -107,18 +109,10 @@ public class JSONUnmarshallerTest {
      * string field shall be set to string field
      */
     @Test
-    public void testThatStringIsSetToStringField() throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
-        final Iterator keys = Arrays.asList(new String[]{"String"}).iterator();
-        new Expectations() {
-            {
-               // jsonObject.keys();
-                result = keys;
-              //  jsonObject.get("String");
-                result = "blam";
-
-            }
-        };
-
+    public void testThatStringIsSetToStringField() throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, IOException {
+        // must be lenient
+        source = new JsonReader(new StringReader("{ String:'blam'}"));
+        source.setLenient(true);
         WithStringField withString = JSONUnmarshaller.unmarshall(source, WithStringField.class);
 
         assertEquals("blam", withString.getString());
@@ -138,20 +132,13 @@ public class JSONUnmarshallerTest {
     }
 
     /**
-     * string shall be used to construct (i.e integer) object as only constructor paramrter
+     * shall pass integer to value
      */
     @Test
-    public void testThatStringIsUsedAsConstructorParameter() throws  InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
-        final Iterator keys = Arrays.asList("Integer").iterator();
-        new Expectations() {
-            {
-              //  jsonObject.keys();
-                result = keys;
-              //  jsonObject.get("Integer");
-                result = "555";
-
-            }
-        };
+    public void testThatStringIsUsedAsConstructorParameter() throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, IOException {
+        // must be lenient
+        source = new JsonReader(new StringReader("{ 'integer':555}"));
+        source.setLenient(true);
 
         WithInteger withInteger = JSONUnmarshaller.unmarshall(source, WithInteger.class);
 
@@ -173,21 +160,14 @@ public class JSONUnmarshallerTest {
 
     /**
      * not sure this is really necessary, but for sake of completeness
-     * string shjall be also converted to integer
+     * string shall be also converted to integer
      * TODO: investigate if we really need this feature
      */
     @Test
-    public void testThatStringIsUsedAsPrimitive() throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
-        final Iterator keys = Arrays.asList(new String[]{"Primitive"}).iterator();
-        new Expectations() {
-            {
-            //    jsonObject.keys();
-                result = keys;
-             //   jsonObject.get("Primitive");
-                result = "555";
-
-            }
-        };
+    public void testThatStringIsUsedAsPrimitive() throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, IOException {
+        // must be lenient
+        source = new JsonReader(new StringReader("{Primitive:555}"));
+        source.setLenient(true);
 
         WithInt withInt = JSONUnmarshaller.unmarshall(source, WithInt.class);
 
@@ -211,17 +191,12 @@ public class JSONUnmarshallerTest {
      * shall set integer as object
      */
     @Test
-    public void testIntegerObjectSetting() throws  InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
-        final Iterator keys = Arrays.asList(new String[]{"Integer"}).iterator();
-        new Expectations() {
-            {
-            //    jsonObject.keys();
-                result = keys;
-             //   jsonObject.get("Integer");
-                result = 555;
+    public void testIntegerObjectSetting() throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, IOException {
 
-            }
-        };
+        // must be lenient
+        source = new JsonReader(new StringReader("{Integer:555}"));
+        source.setLenient(true);
+
 
         WithInteger withInteger = JSONUnmarshaller.unmarshall(source, WithInteger.class);
 
@@ -233,17 +208,10 @@ public class JSONUnmarshallerTest {
      * shall set integer as primitive value
      */
     @Test
-    public void testIntegerPrimitiveSetting() throws  InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
-        final Iterator keys = Arrays.asList("Primitive").iterator();
-        new Expectations() {
-            {
-          //      jsonObject.keys();
-                result = keys;
-            //    jsonObject.get("Primitive");
-                result = 555;
-
-            }
-        };
+    public void testIntegerPrimitiveSetting() throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, IOException {
+        // must be lenient
+        source = new JsonReader(new StringReader("{Primitive:555}"));
+        source.setLenient(true);
 
         WithInt withInteger = JSONUnmarshaller.unmarshall(source, WithInt.class);
 
@@ -251,21 +219,15 @@ public class JSONUnmarshallerTest {
     }
 
     @Test
-    public void testThatObjectBooleanIsSet() throws  InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
-        final Iterator keys = Arrays.asList("bool").iterator();
-        new Expectations() {
-            {
-             //   jsonObject.keys();
-                result = keys;
-            //    jsonObject.get("bool");
-                result = Boolean.TRUE;
+    public void testThatObjectBooleanIsSet() throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, IOException {
 
-            }
-        };
+        // must be lenient
+        source = new JsonReader(new StringReader("{bool:true}"));
+        source.setLenient(true);
 
-        WithBoolean withInteger = JSONUnmarshaller.unmarshall(source,WithBoolean.class);
+        WithBoolean withInteger = JSONUnmarshaller.unmarshall(source, WithBoolean.class);
 
-        assertTrue( withInteger.getBool());
+        assertTrue(withInteger.getBool());
 
     }
 
@@ -282,44 +244,15 @@ public class JSONUnmarshallerTest {
     }
 
     /**
-     * primitive array field shall be unmarshalled
+     * primitive array field shall be unmarshalled , also for nested arrays
      * TODO: improve test coverage
      */
     @Test
-    public void testPrimitiveArrayUnmarshalling() throws  InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
-        final Iterator keys = Arrays.asList("IntegerArray").iterator();
-        new Expectations() {
-            {
-                /*
-                jsonObject.keys();
-                result = keys;
-                jsonObject.get("IntegerArray");
-                result = jsonArray;
-                jsonArray.length();
-                result = 2;
-                //recursive parsing first nested array
-                jsonArray.get(0);
-                result = jsonArray;
+    public void testPrimitiveArrayUnmarshalling() throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, IOException {
+        // must be lenient
+        source = new JsonReader(new StringReader("{IntegerArray:[[1,2],[3,4]]}"));
+        source.setLenient(true);
 
-                jsonArray.length();
-                result = 2;
-                jsonArray.get(0);
-                result = 1;
-                jsonArray.get(1);
-                result = 2;
-                // recursive parsing second nested array
-                jsonArray.get(1);
-                result = jsonArray;
-
-                jsonArray.length();
-                result = 2;
-                jsonArray.get(0);
-                result = 3;
-                jsonArray.get(1);
-                result = 4;
-                */
-            }
-        };
 
         WithIntegerArray wia = JSONUnmarshaller.unmarshall(source, WithIntegerArray.class);
 
@@ -351,22 +284,10 @@ public class JSONUnmarshallerTest {
      * nested bean shall be parsed
      */
     @Test
-    public void testNestedBeanParsing() throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
-        final Iterator keys = Arrays.asList("WithInt").iterator();
-        final Iterator nestedKeys = Arrays.asList("Primitive").iterator();
-        new Expectations() {
-            {
-              //  jsonObject.keys();
-                result = keys;
-              //  jsonObject.get("WithInt");
-               // result = jsonObject;
-               // jsonObject.keys();
-              //  result = nestedKeys;
-              //  jsonObject.get("Primitive");
-              //  result = 239;
-            }
-        };
-
+    public void testNestedBeanParsing() throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, IOException {
+        // must be lenient
+        source = new JsonReader(new StringReader("{WithInt:{Primitive:239}}"));
+        source.setLenient(true);
 
         WithNestedBean wnb = JSONUnmarshaller.unmarshall(source, WithNestedBean.class);
         assertNotNull(wnb);
@@ -391,17 +312,11 @@ public class JSONUnmarshallerTest {
      * if there is a field without corresponding setter, it has to be ignored.
      */
     @Test
-    public void testThatKeyWithoutSetterIsIgnoredSafely() throws InvocationTargetException, NoSuchMethodException,  InstantiationException, IllegalAccessException {
-        final Iterator keys = Arrays.asList("invalidKey").iterator();
-        new Expectations() {
-            {
-               //jsonObject.keys();
-                result = keys;
+    public void testThatKeyWithoutSetterIsIgnoredSafely() throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, IOException {
+        // must be lenient
+        source = new JsonReader(new StringReader("{invalidKey:444}"));
+        source.setLenient(true);
 
-             //   jsonObject.get("invalidKey");
-                result = 444;
-            }
-        };
 
         WithInt withInteger = JSONUnmarshaller.unmarshall(source, WithInt.class);
         assertNotNull(withInteger);
@@ -412,19 +327,13 @@ public class JSONUnmarshallerTest {
      * both capitalisation forms must be allowed
      */
     @Test
-    public void testThatLowercasePropertyNamesAreRecognised() throws  InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
-        final Iterator keys = Arrays.asList("primitive").iterator();
-        new Expectations() {
-            {
-             //   jsonObject.keys();
-                result = keys;
-            //    jsonObject.get("primitive");
-                result = 555;
-            }
-        };
+    public void testThatLowercasePropertyNamesAreRecognised() throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, IOException {
+        // must be lenient
+        source = new JsonReader(new StringReader("{primitive:555}"));
+        source.setLenient(true);
+
 
         WithInt withInteger = JSONUnmarshaller.unmarshall(source, WithInt.class);
-
         assertEquals(555, withInteger.getPrimitive());
     }
 }
