@@ -20,6 +20,7 @@ package de.pribluda.android.jsonmarshaller;
 
 import com.google.gson.stream.JsonWriter;
 
+import java.io.IOException;
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -40,8 +41,7 @@ public class JSONMarshaller {
      * @param object
      * @return
      */
-    public static void marshall(JsonWriter writer, Object object) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
-
+    public static void marshall(JsonWriter writer, Object object) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException, IOException {
         marshallRecursive(writer, object);
 
     }
@@ -51,42 +51,51 @@ public class JSONMarshaller {
      *
      * @param object
      */
-    static void marshallRecursive(JsonWriter writer, Object object) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
+    static void marshallRecursive(JsonWriter writer, Object object) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException, IOException {
         // nothing to marshall
         if (object == null)
             return;
-        // primitive object is a field and does not interes us here
+        // primitive object is a field and does not interest us here
         if (object.getClass().isPrimitive())
             return;
         // object not null,  and is not primitive - iterate through getters
+        // begin object writing
+        writer.beginObject();
         for (Method method : object.getClass().getMethods()) {
-            //System.err.println("method:" + method);
+
+            System.err.println("method:" + method);
             // our getters are parameterless and start with "get"
             if ((method.getName().startsWith(GETTER_PREFIX) && method.getName().length() > BEGIN_INDEX || method.getName().startsWith(IS_PREFIX) && method.getName().length() > IS_LENGTH) && (method.getModifiers() & Modifier.PUBLIC) != 0 && method.getParameterTypes().length == 0 && method.getReturnType() != void.class) {
+                System.err.println("... eligible");
+                // write name:
+                writer.name(propertize(method.getName()));
                 // is return value primitive?
                 Class<?> type = method.getReturnType();
                 if (type.isPrimitive() || String.class.equals(type)) {
-                    //System.err.println("passed primitive");
-                    // it is, marshall it
-                    //    System.err.println("marshall primitive " + method.getName() + "/" + method.invoke(object));
-                    //         sink.put(propertize(method.getName()), method.invoke(object));
+                    System.err.println("primitive");
+                    // TODO: better discrimination may be necessary
+                    writer.value(method.invoke(object).toString());
                     continue;
                 } else if (type.isArray()) {
-                    //         sink.put(propertize(method.getName()), marshallArray(method.invoke(object)));
+                    marshallArray(writer, method.invoke(object));
                     continue;
                 } else {
                     // does it have default constructor?
                     try {
                         if (method.getReturnType().getConstructor() != null) {
-                            //                sink.put(propertize(method.getName()), marshall(method.invoke(object)));
+                            marshall(writer, method.invoke(object));
                             continue;
                         }
                     } catch (NoSuchMethodException ex) {
                         // just ignore it here, it means no such constructor was found
+                        writer.nullValue();
                     }
                 }
             }
+
         }
+        // we are done here
+        writer.endObject();
     }
 
     /**
