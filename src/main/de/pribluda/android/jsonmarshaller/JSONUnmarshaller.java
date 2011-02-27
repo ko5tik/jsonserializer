@@ -35,8 +35,8 @@ import java.util.HashMap;
 public class JSONUnmarshaller {
     private static final String SETTER_PREFIX = "set";
 
-
     static final HashMap<Class, Class> primitves = new HashMap<Class, Class>();
+
 
     static {
         primitves.put(Integer.TYPE, Integer.class);
@@ -166,7 +166,7 @@ public class JSONUnmarshaller {
                 break;
             case BEGIN_OBJECT:
                 // so, we are unmarshalling nested object - recyrse
-                value = unmarshall(reader,clazz);
+                value = unmarshall(reader, clazz);
                 break;
             default:
                 // do not know what to do with it,  skip

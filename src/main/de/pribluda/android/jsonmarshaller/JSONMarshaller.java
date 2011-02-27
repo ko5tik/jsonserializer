@@ -65,32 +65,14 @@ public class JSONMarshaller {
 
             System.err.println("method:" + method);
             // our getters are parameterless and start with "get"
-            if ((method.getName().startsWith(GETTER_PREFIX) && method.getName().length() > BEGIN_INDEX || method.getName().startsWith(IS_PREFIX) && method.getName().length() > IS_LENGTH) && (method.getModifiers() & Modifier.PUBLIC) != 0 && method.getParameterTypes().length == 0 && method.getReturnType() != void.class) {
+            if ((method.getName().startsWith(GETTER_PREFIX) && method.getName().length() > BEGIN_INDEX || method.getName().startsWith(IS_PREFIX) && method.getName().length() > IS_LENGTH) && (method.getModifiers() & Modifier.PUBLIC) != 0 && method.getParameterTypes().length == 0 && method.getReturnType() != void.class && !method.getName().equals("getClass")) {
                 System.err.println("... eligible");
                 // write name:
                 writer.name(propertize(method.getName()));
-                // is return value primitive?
-                Class<?> type = method.getReturnType();
-                if (type.isPrimitive() || String.class.equals(type)) {
-                    System.err.println("primitive");
-                    // TODO: better discrimination may be necessary
-                    writer.value(method.invoke(object).toString());
-                    continue;
-                } else if (type.isArray()) {
-                    marshallArray(writer, method.invoke(object));
-                    continue;
-                } else {
-                    // does it have default constructor?
-                    try {
-                        if (method.getReturnType().getConstructor() != null) {
-                            marshall(writer, method.invoke(object));
-                            continue;
-                        }
-                    } catch (NoSuchMethodException ex) {
-                        // just ignore it here, it means no such constructor was found
-                        writer.nullValue();
-                    }
-                }
+                // retrieve value
+                Object value = method.invoke(object);
+                marshallValue(writer, value);
+
             }
 
         }
@@ -99,42 +81,68 @@ public class JSONMarshaller {
     }
 
     /**
+     * marshall single value
+     *
+     * @param writer
+     * @param value
+     * @throws IOException
+     * @throws InvocationTargetException
+     * @throws NoSuchMethodException
+     * @throws IllegalAccessException
+     */
+    private static void marshallValue(JsonWriter writer, Object value) throws IOException, InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+        if(value == null) {
+            writer.nullValue();
+            return;
+        }
+        // is return value primitive?
+        Class<?> type = value.getClass();
+        System.err.println("class:" + type);
+        if (String.class.equals(type)) {
+            System.err.println("string");
+            writer.value(value.toString());
+        } else if (Boolean.class.isAssignableFrom(type)) {
+            System.err.println("boolean");
+             writer.value((Boolean)value);
+        }
+        else if(Number.class.isAssignableFrom(type)) {
+            System.err.println("number");
+            writer.value((Number)value);
+            return;
+        } else if (type.isArray()) {
+            marshallArray(writer, value);
+            return;
+        } else {
+            // does it have default constructor?
+            try {
+                if (type.getConstructor() != null) {
+                    marshall(writer, value);
+                    return;
+                }
+            } catch (NoSuchMethodException ex) {
+                // just ignore it here, it means no such constructor was found
+                System.err.println("writing null value, no default constructor");
+                writer.nullValue();
+            }
+        }
+    }
+
+    /**
      * recursively marshall [multidimensional? - of course!!! ] array
      *
      * @param array
      * @return
      */
-    static void marshallArray(JsonWriter sink, Object array) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+    static void marshallArray(JsonWriter writer, Object array) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, IOException {
         if (array.getClass().isArray()) {
+            writer.beginArray();
             Class componentType = array.getClass().getComponentType();
             //  JSONArray retval = new JSONArray();
             final int arrayLength = Array.getLength(array);
-            // stirngs and primitives must be marshalled directly
-            if (componentType.isPrimitive() || String.class.equals(componentType)) {
-
-                for (int i = 0; i < arrayLength; i++) {
-                    //   retval.put(Array.get(array, i));
-                }
-            } else if (componentType.isArray()) {
-                // that's cool, nested array recurse
-                for (int i = 0; i < arrayLength; i++) {
-                    //   retval.put(marshallArray(Array.get(array, i)));
-                }
-            } else {
-                // treat component as a bean   if it got default constructor
-                try {
-                    //System.err.println("determining default constructor:" + componentType.getConstructor());
-                    if (componentType.getConstructor() != null) {
-                        for (int i = 0; i < arrayLength; i++) {
-                            //    retval.put(marshall(Array.get(array, i)));
-                        }
-                    }
-                } catch (NoSuchMethodException ex) {
-                    // just ignore it here, it means no such constructor was found
-                }
+            for (int i = 0; i < arrayLength; i++) {
+                marshallValue(writer, Array.get(array, i));
             }
-
-
+            writer.endArray();
         }
     }
 

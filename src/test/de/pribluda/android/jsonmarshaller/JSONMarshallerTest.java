@@ -4,7 +4,6 @@ package de.pribluda.android.jsonmarshaller;
 import com.google.gson.stream.JsonWriter;
 import mockit.Expectations;
 import mockit.Mocked;
-import mockit.Verifications;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -32,7 +31,8 @@ public class JSONMarshallerTest {
     }
 
     /**
-     * bad getters shall be ignored altogether
+     * bad getters shall be ignored altogether, we consider getters not following
+     * jaba beans patter as "bad"
      */
     @Test
     public void testBadGettersAreNotCalled() throws Exception {
@@ -63,10 +63,7 @@ public class JSONMarshallerTest {
             return "";
         }
 
-        public NotABean getNotABean() {
-            fail("called getter of not a bean class (without default constructor)");
-            return null;
-        }
+
     }
 
     /**
@@ -75,6 +72,45 @@ public class JSONMarshallerTest {
     public static class NotABean {
         private NotABean() {
 
+        }
+    }
+
+    @Test
+    public void testThatNotABeanComesOutAsNull() throws IOException, InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+
+        new Expectations() {
+            {
+                writer.beginObject();
+                writer.name("NotABean");
+                writer.nullValue();
+                writer.endObject();
+            }
+        };
+        new JSONMarshaller().marshall(writer, new WithNotABean());
+    }
+
+    public class WithNotABean {
+        public NotABean getNotABean() {
+            return new NotABean();
+        }
+    }
+
+    @Test
+    public void testThatNullComesOutAsNull() throws IOException, InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+        new Expectations() {
+            {
+                writer.beginObject();
+                writer.name("NullBean");
+                writer.nullValue();
+                writer.endObject();
+            }
+        };
+        new JSONMarshaller().marshall(writer, new WithNullBean());
+    }
+
+    public class WithNullBean {
+        public GoodPrimitiveGetter getNullBean() {
+            return null;
         }
     }
 
@@ -113,17 +149,15 @@ public class JSONMarshallerTest {
     public void testBeanIsFollowed() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, IOException {
         new Expectations() {
             {
-                // create root json object
-                // new JSONObject();
-                // create descendant object
-                //new JSONObject();
-                // retrieve primitive bean (nothing to mock here)
+                writer.beginObject();
+                writer.name("Primitives");
 
-                // marshall getter of  primitive nested bean
-                //jsonObject.put("Foo", "foo");
-                // put nested object into parent
-                //  jsonObject.put("Primitives", withAny(JSONObject.class));
+                writer.beginObject();
+                writer.name("Foo");
+                writer.value("foo");
+                writer.endObject();
 
+                writer.endObject();
             }
         };
 
@@ -144,13 +178,16 @@ public class JSONMarshallerTest {
      */
     @Test
     public void testThatStringIsTreatedAsPrimitive() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, IOException {
-
-        (new JSONMarshaller()).marshall(writer, new GoodPrimitiveGetter());
-        new Verifications() {
+        new Expectations() {
             {
-                //jsonObject.put("Foo", "foo");
+
+                writer.beginObject();
+                writer.name("Foo");
+                writer.value("foo");
+                writer.endObject();
             }
         };
+        (new JSONMarshaller()).marshall(writer, new GoodPrimitiveGetter());
 
     }
 
@@ -159,19 +196,20 @@ public class JSONMarshallerTest {
      * shall marshall primitive array in proper way
      */
     @Test
-    public void testThatSingleDimensionalPrimitiveArrayIsMarshalledProperly() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
-
+    public void testThatSingleDimensionalPrimitiveArrayIsMarshalledProperly() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, IOException {
         new Expectations() {
             {
-                // shall create JSON array
-                // new JSONArray();
-                // and put values there
-                //  array.put((Object) 1);
-                //   array.put((Object) 2);
-                //  array.put((Object) 3);
+
+                writer.beginArray();
+
+                writer.value((Number)1);
+                writer.value((Number)2);
+                writer.value((Number)3);
+
+                writer.endArray();
             }
         };
-        //    assertNotNull(JSONMarshaller.marshallArray(writer,singleDimension));
+        JSONMarshaller.marshallArray(writer, singleDimension);
     }
 
     static int[] singleDimension = new int[]{1, 2, 3};
@@ -180,19 +218,22 @@ public class JSONMarshallerTest {
      * strings are also primitives, also ensure they are marshalled to array properly
      */
     @Test
-    public void testThatStringArrayIsMarshalledProperly() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
-
+    public void testThatStringArrayIsMarshalledProperly() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, IOException {
         new Expectations() {
             {
-                // shall create JSON array
-                //   new JSONArray();
-                // and put values there
-                //  array.put("foo");
-                //  array.put("bar");
-                //   array.put("baz");
+
+                writer.beginArray();
+
+                writer.value("foo");
+                writer.value("bar");
+                writer.value("baz");
+
+                writer.endArray();
             }
         };
-        //   assertNotNull(JSONMarshaller.marshallArray(singleDimensionString));
+
+
+        JSONMarshaller.marshallArray(writer, singleDimensionString);
     }
 
     String[] singleDimensionString = new String[]{"foo", "bar", "baz"};
@@ -202,26 +243,29 @@ public class JSONMarshallerTest {
      * multidimensional array must be processed recursively
      */
     @Test
-    public void testThatMultidimensionalArrayIsProcessedRecursively() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+    public void testThatMultidimensionalArrayIsProcessedRecursively() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, IOException {
         new Expectations() {
             {
-                /*
-                JSONArray root = new JSONArray();
-                JSONArray first = new JSONArray();
-                first.put((Object) 1);
-                first.put((Object) 2);
-                first.put((Object) 3);
-                root.put(first);
-                JSONArray second = new JSONArray();
-                second.put((Object) 4);
-                second.put((Object) 5);
-                second.put((Object) 6);
-                root.put(second);
-                */
+
+                writer.beginArray();
+                writer.beginArray();
+                writer.value((Number)1);
+                writer.value((Number)2);
+                writer.value((Number)3);
+                writer.endArray();
+
+                writer.beginArray();
+                writer.value((Number)4);
+                writer.value((Number)5);
+                writer.value((Number)6);
+                writer.endArray();
+
+                writer.endArray();
             }
         };
 
-        //assertNotNull(JSONMarshaller.marshallArray(multiDimension));
+
+        JSONMarshaller.marshallArray(writer, multiDimension);
     }
 
 
@@ -232,38 +276,40 @@ public class JSONMarshallerTest {
      * array of beans shall be masrhalled
      */
     @Test
-    public void testBeanArrayIsMarshalled() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
-
+    public void testBeanArrayIsMarshalled() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, IOException {
         new Expectations() {
             {
-                // shall create json array
-                //     new JSONArray();
-                // create and populate object out of bean
-                //     new JSONObject();
-                //     jsonObject.put("Foo", "foo");
-                // and store it in resulting array
-                //    array.put(withAny(JSONObject.class));
+
+                writer.beginArray();
+                writer.beginObject();
+                writer.name("Foo");
+                writer.value("foo");
+                writer.endObject();
+                writer.endArray();
+
+
             }
         };
-        // assertNotNull(JSONMarshaller.marshallArray(goodBeans));
+
+        JSONMarshaller.marshallArray(writer, goodBeans);
     }
 
     GoodPrimitiveGetter[] goodBeans = new GoodPrimitiveGetter[]{new GoodPrimitiveGetter()};
 
 
     /**
-     * array of not suitable type shall come out empty
-     * (TODO: this behaviour is discutable, whether this shall come out as null )
+     * bad types come out as nulls, also in array
      */
     @Test
-    public void testThatArrayOfBadTypeComesOutEmpty() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+    public void testThatArrayOfBadTypeContainesNulls() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, IOException {
         new Expectations() {
             {
-                // shall create json array
-                //     new JSONArray();
+                writer.beginArray();
+                writer.nullValue();
+                writer.endArray();
 
             }};
-        //    assertNotNull(JSONMarshaller.marshallArray(badBeans));
+        JSONMarshaller.marshallArray(writer, badBeans);
     }
 
     NotABean[] badBeans = new NotABean[]{new NotABean()};
@@ -273,24 +319,21 @@ public class JSONMarshallerTest {
      * array propeprty shall be followed and serialized
      */
     @Test
-    public void testArrayPropertyIsSerialized() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+    public void testArrayPropertyIsSerialized() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, IOException {
         new Expectations() {
             {
-                //  shall create JSON Object
-                //     new JSONObject();
+                writer.beginObject();
+                writer.name("IntArray");
+                writer.beginArray();
+                writer.value((Number)1);
+                writer.value((Number)2);
+                writer.value((Number)3);
+                writer.endArray();
+                writer.endObject();
 
-                // and serialize aeeay
-                // shall create JSON array
-                //      JSONArray first = new JSONArray();
-                // and put values there
-                //      first.put((Object) 1);
-                //      first.put((Object) 2);
-                //      first.put((Object) 3);
-
-                //     jsonObject.put("IntArray", first);
             }
         };
-        //   assertNotNull(JSONMarshaller.marshall(new WithArray()));
+        JSONMarshaller.marshall(writer, new WithArray());
     }
 
     public static class WithArray {
@@ -304,14 +347,18 @@ public class JSONMarshallerTest {
      */
     @Test
     public void testThatPrimitiveBooleanWithIsIsMarshalled() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, IOException {
-
-        (new JSONMarshaller()).marshall(writer, new WithPrimitiveBoolean());
-        new Verifications() {
+        new Expectations() {
             {
-                //         jsonObject.put("Bool", (Object) true);
-            }
-        };
+                writer.beginObject();
+                writer.name("Bool");
+                writer.value(true);
+                writer.endObject();
+
+            }};
+        (new JSONMarshaller()).marshall(writer, new WithPrimitiveBoolean());
+
     }
+
 
     public static class WithPrimitiveBoolean {
 
@@ -326,13 +373,16 @@ public class JSONMarshallerTest {
      */
     @Test
     public void testThatPrimitiveBooleanWithGetIsMarshalled() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, IOException {
-
-        (new JSONMarshaller()).marshall(writer, new WithPrimitiveGetBoolean());
-        new Verifications() {
+        new Expectations() {
             {
-                // jsonObject.put("Bool", (Object) true);
-            }
-        };
+                writer.beginObject();
+                writer.name("Bool");
+                writer.value(true);
+                writer.endObject();
+
+            }};
+        (new JSONMarshaller()).marshall(writer, new WithPrimitiveGetBoolean());
+
     }
 
     public static class WithPrimitiveGetBoolean {
@@ -343,38 +393,20 @@ public class JSONMarshallerTest {
     }
 
     /**
-     * primitive boolean with is-getter shall be marshalled
-     */
-    @Test
-    public void testThatObjectBooleanWithGetIsMarshalled() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, IOException {
-
-        (new JSONMarshaller()).marshall(writer, new WithPrimitiveGetBoolean());
-        new Verifications() {
-            {
-                // jsonObject.put("Bool", (Object) true);
-            }
-        };
-    }
-
-    public static class WithObjectGetBoolean {
-
-        public Boolean getBool() {
-            return true;
-        }
-    }
-
-
-    /**
      * inherited entities shall be taken into account
      */
     @Test
     public void testThatInheritedPropertiesAreUsed() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, IOException {
-        (new JSONMarshaller()).marshall(writer, new Derived());
-        new Verifications() {
+        new Expectations() {
             {
-                //  jsonObject.put("Bool", (Object) true);
-            }
-        };
+                writer.beginObject();
+                writer.name("Bool");
+                writer.value(true);
+                writer.endObject();
+
+            }};
+        (new JSONMarshaller()).marshall(writer, new Derived());
+
     }
 
     public static class Derived extends WithPrimitiveGetBoolean {
