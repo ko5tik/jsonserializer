@@ -19,6 +19,7 @@ package de.pribluda.android.jsonmarshaller;
 
 
 import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonToken;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -28,6 +29,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * performs unmarshalling of JSON data creating objects
@@ -46,8 +48,7 @@ public class JSONUnmarshaller {
     }
 
     /**
-     * TODO: provide support for nested JSON objects
-     * TODO: provide support for embedded JSON Arrays
+     * unmarshall single JSON object
      *
      * @param beanToBeCreatedClass
      * @param <T>
@@ -105,6 +106,26 @@ public class JSONUnmarshaller {
         return value;
 
     }
+
+    /**
+     * read array into list
+     *
+     * @param reader
+     * @param beanToBeCreatedClass
+     * @return
+     */
+    public static <T> List<T> unmarshallArray(JsonReader reader, java.lang.Class<T> beanToBeCreatedClass) throws IOException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+        ArrayList<T> retval = new ArrayList();
+        reader.beginArray();
+        // read objects after each other
+        while (reader.peek() == JsonToken.BEGIN_OBJECT) {
+            retval.add(unmarshall(reader, beanToBeCreatedClass));
+        }
+        reader.endArray();
+
+        return retval;
+    }
+
 
     private static <T> Object convertToObject(Class clazz, Object v) throws InstantiationException, IllegalAccessException, InvocationTargetException {
         // or maybe there is method with suitable parameter?

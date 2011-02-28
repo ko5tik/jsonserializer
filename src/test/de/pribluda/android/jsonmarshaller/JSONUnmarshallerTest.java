@@ -23,6 +23,7 @@ import org.junit.Test;
 import java.io.IOException;
 import java.io.StringReader;
 import java.lang.reflect.InvocationTargetException;
+import java.util.List;
 
 import static org.junit.Assert.*;
 
@@ -335,5 +336,57 @@ public class JSONUnmarshallerTest {
 
         WithInt withInteger = JSONUnmarshaller.unmarshall(source, WithInt.class);
         assertEquals(555, withInteger.getPrimitive());
+    }
+
+    /**
+     * shall stop unmarshalling after bean end
+     */
+    @Test
+    public void testUnmarshallerStopsAfterObjectEnd() throws InvocationTargetException, IOException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+        // must be lenient
+        source = new JsonReader(new StringReader("{one:239},{two:555}"));
+        source.setLenient(true);
+
+        WithTwoProperties bean = JSONUnmarshaller.unmarshall(source, WithTwoProperties.class);
+        assertEquals(239, bean.getOne());
+        assertEquals(0, bean.getTwo());
+    }
+
+
+    public static class WithTwoProperties {
+        int one;
+        int two;
+
+        public int getOne() {
+            return one;
+        }
+
+        public void setOne(int one) {
+            this.one = one;
+        }
+
+        public int getTwo() {
+            return two;
+        }
+
+        public void setTwo(int two) {
+            this.two = two;
+        }
+    }
+
+
+    /**
+     * unmarshalling of JSON array shall produce list
+     */
+    @Test
+    public void testUnmarshallingOfJsonArray() throws InvocationTargetException, IOException, NoSuchMethodException, IllegalAccessException, InstantiationException {
+        // must be lenient
+        source = new JsonReader(new StringReader("[{one:239},{two:555}]"));
+        source.setLenient(true);
+        final List<WithTwoProperties> list = JSONUnmarshaller.unmarshallArray(source, WithTwoProperties.class);
+
+        assertEquals(2, list.size());
+        assertEquals(239, list.get(0).getOne());
+        assertEquals(555, list.get(1).getTwo());
     }
 }

@@ -133,7 +133,7 @@ public class JSONMarshaller {
      * @param array
      * @return
      */
-    static void marshallArray(JsonWriter writer, Object array) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, IOException {
+    public static void marshallArray(JsonWriter writer, Object array) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, IOException {
         if (array.getClass().isArray()) {
             writer.beginArray();
             Class componentType = array.getClass().getComponentType();
