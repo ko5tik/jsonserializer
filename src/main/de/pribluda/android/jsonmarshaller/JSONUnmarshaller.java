@@ -45,6 +45,7 @@ public class JSONUnmarshaller {
         primitves.put(Long.TYPE, Long.class);
         primitves.put(Double.TYPE, Double.class);
         primitves.put(Boolean.TYPE, Boolean.class);
+        primitves.put(Character.TYPE, Character.class);
     }
 
     /**
@@ -63,7 +64,6 @@ public class JSONUnmarshaller {
         reader.beginObject();
 
         if (reader.peek() == null) {
-
             return null;
         }
         T value = beanToBeCreatedClass.getConstructor().newInstance();
@@ -82,16 +82,18 @@ public class JSONUnmarshaller {
                 Class clazz = method.getParameterTypes()[0];
                 // as we have setter, we can process value
                 Object v = unmarshalValue(reader, clazz);
-               // System.err.println("class to set:" + clazz);
-               // System.err.println("value:" + v);
+              //  System.err.println("class to set:" + clazz);
+              //  System.err.println("value:" + v);
                 // can we use setter method directly?
                 if (clazz.isAssignableFrom(v.getClass())) {
+                 //   System.err.println("assignable - invoke now");
                     method.invoke(value, v);
                     continue;
                 } else {
-                    //System.err.println("... not assignable");
+               //     System.err.println("... not assignable");
                 }
                 Object obj = convertToObject(clazz, v);
+             //   System.err.println("converted to object:" + obj);
                 if (obj != null)
                     method.invoke(value, obj);
             } else {
@@ -129,9 +131,21 @@ public class JSONUnmarshaller {
 
     private static <T> Object convertToObject(Class clazz, Object v) throws InstantiationException, IllegalAccessException, InvocationTargetException {
         // or maybe there is method with suitable parameter?
+      //  System.err.println("requested:" + clazz);
         if (clazz.isPrimitive() && primitves.get(clazz) != null) {
-            //System.err.println("... primitive found");
+         //   System.err.println("... primitive found");
             clazz = primitves.get(clazz);
+        }
+        // do we have character? it needs special treatment
+        if (clazz.equals(Character.class)) {
+
+            final String stingValue = v.toString();
+            if (stingValue.length() > 0) {
+                return new Character(stingValue.charAt(0));
+            } else {
+                return null;
+            }
+
         }
         Constructor constructor = null;
         try {
@@ -168,7 +182,7 @@ public class JSONUnmarshaller {
             case STRING:
             case NUMBER:
                 // process string
-               // System.err.println("processing string");
+                // System.err.println("processing string");
                 value = reader.nextString();
                 break;
             case BOOLEAN:
@@ -177,7 +191,7 @@ public class JSONUnmarshaller {
             case BEGIN_ARRAY:
                 //  we are interested in arrays
                 if (clazz.isArray()) {
-                 //   System.err.println("... is array");
+                    //   System.err.println("... is array");
 
                     // populate field value from JSON Array
                     value = populateRecusrsive(clazz, reader);
@@ -205,7 +219,7 @@ public class JSONUnmarshaller {
      * @return
      */
     private static Object populateRecusrsive(Class arrayClass, JsonReader reader) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, IOException {
-      //  System.err.println("recursive populating " + arrayClass);
+        //  System.err.println("recursive populating " + arrayClass);
         ArrayList value = new ArrayList();
         Object retval = null;
         reader.beginArray();
@@ -227,15 +241,15 @@ public class JSONUnmarshaller {
                     // component is leaf,
                     Object leaf = unmarshalValue(reader, componentType);
                     Object obj = convertToObject(componentType, leaf);
-             //   System.err.println("converted to class:" + obj);
+                    //   System.err.println("converted to class:" + obj);
                     if (obj != null) {
-                   //     System.err.println("... add to list");
+                        //     System.err.println("... add to list");
                         value.add(obj);
                     }
                 }
             }
             // copy everything to array,
-          //  System.err.println("creating array of size:" + value.size());
+            //  System.err.println("creating array of size:" + value.size());
             retval = Array.newInstance(componentType, value.size());
             for (int i = 0; i < value.size(); i++) {
                 Array.set(retval, i, value.get(i));
@@ -246,7 +260,7 @@ public class JSONUnmarshaller {
         reader.endArray();
 
 
-      //  System.err.println("array processing ends" + retval);
+        //  System.err.println("array processing ends" + retval);
         return retval;
     }
 

@@ -63,10 +63,10 @@ public class JSONMarshaller {
         writer.beginObject();
         for (Method method : object.getClass().getMethods()) {
 
-            System.err.println("method:" + method);
+           // System.err.println("method:" + method);
             // our getters are parameterless and start with "get"
             if ((method.getName().startsWith(GETTER_PREFIX) && method.getName().length() > BEGIN_INDEX || method.getName().startsWith(IS_PREFIX) && method.getName().length() > IS_LENGTH) && (method.getModifiers() & Modifier.PUBLIC) != 0 && method.getParameterTypes().length == 0 && method.getReturnType() != void.class && !method.getName().equals("getClass")) {
-                System.err.println("... eligible");
+              //  System.err.println("... eligible");
                 // write name:
                 writer.name(propertize(method.getName()));
                 // retrieve value
@@ -97,16 +97,16 @@ public class JSONMarshaller {
         }
         // is return value primitive?
         Class<?> type = value.getClass();
-        System.err.println("class:" + type);
-        if (String.class.equals(type)) {
-            System.err.println("string");
+        //System.err.println("class:" + type);
+        if (String.class.equals(type) || Character.class.equals(type)) {
+            //System.err.println("string");
             writer.value(value.toString());
         } else if (Boolean.class.isAssignableFrom(type)) {
-            System.err.println("boolean");
+          //  System.err.println("boolean");
              writer.value((Boolean)value);
         }
         else if(Number.class.isAssignableFrom(type)) {
-            System.err.println("number");
+           // System.err.println("number");
             writer.value((Number)value);
             return;
         } else if (type.isArray()) {
@@ -121,7 +121,7 @@ public class JSONMarshaller {
                 }
             } catch (NoSuchMethodException ex) {
                 // just ignore it here, it means no such constructor was found
-                System.err.println("writing null value, no default constructor");
+               // System.err.println("writing null value, no default constructor");
                 writer.nullValue();
             }
         }

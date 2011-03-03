@@ -202,9 +202,9 @@ public class JSONMarshallerTest {
 
                 writer.beginArray();
 
-                writer.value((Number)1);
-                writer.value((Number)2);
-                writer.value((Number)3);
+                writer.value((Number) 1);
+                writer.value((Number) 2);
+                writer.value((Number) 3);
 
                 writer.endArray();
             }
@@ -249,15 +249,15 @@ public class JSONMarshallerTest {
 
                 writer.beginArray();
                 writer.beginArray();
-                writer.value((Number)1);
-                writer.value((Number)2);
-                writer.value((Number)3);
+                writer.value((Number) 1);
+                writer.value((Number) 2);
+                writer.value((Number) 3);
                 writer.endArray();
 
                 writer.beginArray();
-                writer.value((Number)4);
-                writer.value((Number)5);
-                writer.value((Number)6);
+                writer.value((Number) 4);
+                writer.value((Number) 5);
+                writer.value((Number) 6);
                 writer.endArray();
 
                 writer.endArray();
@@ -325,9 +325,9 @@ public class JSONMarshallerTest {
                 writer.beginObject();
                 writer.name("IntArray");
                 writer.beginArray();
-                writer.value((Number)1);
-                writer.value((Number)2);
-                writer.value((Number)3);
+                writer.value((Number) 1);
+                writer.value((Number) 2);
+                writer.value((Number) 3);
                 writer.endArray();
                 writer.endObject();
 
@@ -411,5 +411,54 @@ public class JSONMarshallerTest {
 
     public static class Derived extends WithPrimitiveGetBoolean {
 
+    }
+
+    /**
+     * proimitive char shall come out properly
+     */
+    @Test
+    public void testCharIsMarshalledProperly() throws IOException, InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+        new Expectations() {
+            {
+                writer.beginObject();
+                writer.name("Primitive");
+                writer.value("x");
+                writer.endObject();
+
+            }};
+        (new JSONMarshaller()).marshall(writer, new WithPrimitiveChar());
+
+    }
+
+    public static class WithPrimitiveChar {
+
+        public char getPrimitive() {
+            return 'x';
+        }
+    }
+
+    /**
+      * object character  char shall come out properly
+      */
+     @Test
+     public void testCharacterIsMarshalledProperly() throws IOException, InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+         new Expectations() {
+             {
+                 writer.beginObject();
+                 writer.name("Object");
+                 writer.value("x");
+                 writer.endObject();
+
+             }};
+         (new JSONMarshaller()).marshall(writer, new WithObjectChar());
+
+     }
+
+
+    public static class WithObjectChar {
+
+        public char getObject() {
+            return 'x';
+        }
     }
 }

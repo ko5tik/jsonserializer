@@ -389,4 +389,50 @@ public class JSONUnmarshallerTest {
         assertEquals(239, list.get(0).getOne());
         assertEquals(555, list.get(1).getTwo());
     }
+
+    @Test
+    public void testUnmarshallingPrimitiveCharacter() throws InvocationTargetException, IOException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+        source = new JsonReader(new StringReader("{foo:'a'}"));
+        source.setLenient(true);
+
+        final WithPrimitiveChar withPrimitiveChar = JSONUnmarshaller.unmarshall(source, WithPrimitiveChar.class);
+        System.err.println("set:" +  withPrimitiveChar.getFoo());
+        assertEquals((char)'a', (char)withPrimitiveChar.getFoo());
+    }
+
+
+    public static class WithPrimitiveChar {
+        char foo = 'x';
+
+        public char getFoo() {
+            return foo;
+        }
+
+        public void setFoo(char foo) {
+            this.foo = foo;
+        }
+    }
+
+    @Test
+    public void testUnmarshallingObjectCharacter() throws InvocationTargetException, IOException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+        source = new JsonReader(new StringReader("{foo:'a'}"));
+        source.setLenient(true);
+
+        final WithObjectChar withObjectChar = JSONUnmarshaller.unmarshall(source, WithObjectChar.class);
+        assertEquals(new Character('a'), withObjectChar.getFoo());
+    }
+
+
+    public static class WithObjectChar {
+        Character foo;
+
+        public Character getFoo() {
+            return foo;
+        }
+
+        public void setFoo(Character foo) {
+            this.foo = foo;
+        }
+    }
+
 }
