@@ -25,6 +25,7 @@ import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.HashMap;
 
 /**
  * marshall beans to JSON into writer
@@ -34,6 +35,11 @@ public class JSONMarshaller {
     private static final int BEGIN_INDEX = GETTER_PREFIX.length();
     public static final String IS_PREFIX = "is";
     public static final int IS_LENGTH = 2;
+
+    /**
+     * cache methods in classes because on android it seems to be disabled
+     */
+    static final HashMap<Class, Method[]> methodCache = new HashMap();
 
     /**
      * marshall supplied object (tree?) to JSON
@@ -61,12 +67,20 @@ public class JSONMarshaller {
         // object not null,  and is not primitive - iterate through getters
         // begin object writing
         writer.beginObject();
-        for (Method method : object.getClass().getMethods()) {
 
-           // System.err.println("method:" + method);
+        // cache methods  for classes
+        Method[] methods = methodCache.get(object.getClass());
+        if (methods == null) {
+            methods = object.getClass().getMethods();
+            methodCache.put(object.getClass(), methods);
+        }
+
+        for (Method method : methods) {
+
+            // System.err.println("method:" + method);
             // our getters are parameterless and start with "get"
             if ((method.getName().startsWith(GETTER_PREFIX) && method.getName().length() > BEGIN_INDEX || method.getName().startsWith(IS_PREFIX) && method.getName().length() > IS_LENGTH) && (method.getModifiers() & Modifier.PUBLIC) != 0 && method.getParameterTypes().length == 0 && method.getReturnType() != void.class && !method.getName().equals("getClass")) {
-              //  System.err.println("... eligible");
+                //  System.err.println("... eligible");
                 // write name:
                 writer.name(propertize(method.getName()));
                 // retrieve value
@@ -91,7 +105,7 @@ public class JSONMarshaller {
      * @throws IllegalAccessException
      */
     private static void marshallValue(JsonWriter writer, Object value) throws IOException, InvocationTargetException, NoSuchMethodException, IllegalAccessException {
-        if(value == null) {
+        if (value == null) {
             writer.nullValue();
             return;
         }
@@ -102,12 +116,11 @@ public class JSONMarshaller {
             //System.err.println("string");
             writer.value(value.toString());
         } else if (Boolean.class.isAssignableFrom(type)) {
-          //  System.err.println("boolean");
-             writer.value((Boolean)value);
-        }
-        else if(Number.class.isAssignableFrom(type)) {
-           // System.err.println("number");
-            writer.value((Number)value);
+            //  System.err.println("boolean");
+            writer.value((Boolean) value);
+        } else if (Number.class.isAssignableFrom(type)) {
+            // System.err.println("number");
+            writer.value((Number) value);
             return;
         } else if (type.isArray()) {
             marshallArray(writer, value);
@@ -121,7 +134,7 @@ public class JSONMarshaller {
                 }
             } catch (NoSuchMethodException ex) {
                 // just ignore it here, it means no such constructor was found
-               // System.err.println("writing null value, no default constructor");
+                // System.err.println("writing null value, no default constructor");
                 writer.nullValue();
             }
         }

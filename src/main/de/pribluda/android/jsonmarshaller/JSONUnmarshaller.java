@@ -38,7 +38,7 @@ public class JSONUnmarshaller {
     private static final String SETTER_PREFIX = "set";
 
     static final HashMap<Class, Class> primitves = new HashMap<Class, Class>();
-
+    static final HashMap<Class,Method[]>    methodCache = new HashMap();
 
     static {
         primitves.put(Integer.TYPE, Integer.class);
@@ -72,28 +72,26 @@ public class JSONUnmarshaller {
 
 
             //  capitalise to standard setter pattern
-            String methodName = SETTER_PREFIX + key.substring(0, 1).toUpperCase() + key.substring(1);
+            StringBuilder sb = new StringBuilder();
+            sb.append(SETTER_PREFIX).append(Character.toUpperCase(key.charAt(0))).append(key.substring(1));
+            String methodName = sb.toString();
 
 
             Method method = getCandidateMethod(beanToBeCreatedClass, methodName);
 
             // must be kind of setter method
-            if (method != null && method.getParameterTypes().length == 1) {
+            if (method != null) {
                 Class clazz = method.getParameterTypes()[0];
                 // as we have setter, we can process value
                 Object v = unmarshalValue(reader, clazz);
-              //  System.err.println("class to set:" + clazz);
-              //  System.err.println("value:" + v);
+
                 // can we use setter method directly?
                 if (clazz.isAssignableFrom(v.getClass())) {
-                 //   System.err.println("assignable - invoke now");
                     method.invoke(value, v);
                     continue;
-                } else {
-               //     System.err.println("... not assignable");
                 }
+
                 Object obj = convertToObject(clazz, v);
-             //   System.err.println("converted to object:" + obj);
                 if (obj != null)
                     method.invoke(value, obj);
             } else {
@@ -101,7 +99,6 @@ public class JSONUnmarshaller {
                 reader.skipValue();
             }
         }
-
 
         reader.endObject();
 
@@ -131,9 +128,7 @@ public class JSONUnmarshaller {
 
     private static <T> Object convertToObject(Class clazz, Object v) throws InstantiationException, IllegalAccessException, InvocationTargetException {
         // or maybe there is method with suitable parameter?
-      //  System.err.println("requested:" + clazz);
         if (clazz.isPrimitive() && primitves.get(clazz) != null) {
-         //   System.err.println("... primitive found");
             clazz = primitves.get(clazz);
         }
         // do we have character? it needs special treatment
@@ -182,7 +177,6 @@ public class JSONUnmarshaller {
             case STRING:
             case NUMBER:
                 // process string
-                // System.err.println("processing string");
                 value = reader.nextString();
                 break;
             case BOOLEAN:
@@ -191,8 +185,6 @@ public class JSONUnmarshaller {
             case BEGIN_ARRAY:
                 //  we are interested in arrays
                 if (clazz.isArray()) {
-                    //   System.err.println("... is array");
-
                     // populate field value from JSON Array
                     value = populateRecusrsive(clazz, reader);
                 } else {
@@ -219,7 +211,6 @@ public class JSONUnmarshaller {
      * @return
      */
     private static Object populateRecusrsive(Class arrayClass, JsonReader reader) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, IOException {
-        //  System.err.println("recursive populating " + arrayClass);
         ArrayList value = new ArrayList();
         Object retval = null;
         reader.beginArray();
@@ -241,15 +232,12 @@ public class JSONUnmarshaller {
                     // component is leaf,
                     Object leaf = unmarshalValue(reader, componentType);
                     Object obj = convertToObject(componentType, leaf);
-                    //   System.err.println("converted to class:" + obj);
                     if (obj != null) {
-                        //     System.err.println("... add to list");
                         value.add(obj);
                     }
                 }
             }
             // copy everything to array,
-            //  System.err.println("creating array of size:" + value.size());
             retval = Array.newInstance(componentType, value.size());
             for (int i = 0; i < value.size(); i++) {
                 Array.set(retval, i, value.get(i));
@@ -259,8 +247,6 @@ public class JSONUnmarshaller {
         }
         reader.endArray();
 
-
-        //  System.err.println("array processing ends" + retval);
         return retval;
     }
 
@@ -272,8 +258,13 @@ public class JSONUnmarshaller {
      * @return
      */
     private static Method getCandidateMethod(Class clazz, String name) {
-        for (Method method : clazz.getMethods()) {
-            if (name.equals(method.getName()) && method.getParameterTypes().length == 1)
+        Method[] candidates = methodCache.get(clazz);
+        if(candidates == null) {
+            candidates = clazz.getMethods();
+            methodCache.put(clazz,candidates);
+        }
+        for (Method method : candidates) {
+            if (method.getParameterTypes().length == 1 && name.equals(method.getName()))
                 return method;
         }
         return null;
