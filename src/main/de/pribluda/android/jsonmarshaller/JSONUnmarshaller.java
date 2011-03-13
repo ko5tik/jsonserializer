@@ -38,7 +38,8 @@ public class JSONUnmarshaller {
     private static final String SETTER_PREFIX = "set";
 
     static final HashMap<Class, Class> primitves = new HashMap<Class, Class>();
-    static final HashMap<Class,Method[]>    methodCache = new HashMap();
+    static final HashMap<Class, Method[]> methodCache = new HashMap();
+    static final HashMap<Class, Constructor> constructorCache = new HashMap();
 
     static {
         primitves.put(Integer.TYPE, Integer.class);
@@ -46,6 +47,7 @@ public class JSONUnmarshaller {
         primitves.put(Double.TYPE, Double.class);
         primitves.put(Boolean.TYPE, Boolean.class);
         primitves.put(Character.TYPE, Character.class);
+        primitves.put(Short.TYPE, Short.class);
     }
 
     /**
@@ -125,12 +127,33 @@ public class JSONUnmarshaller {
         return retval;
     }
 
-
+    /**
+     * convert unmarshalled value to object. here we thread only primitive values because
+     * objects were already processed.  Only 2 types of values can occur and be treated  here
+     * - booleans
+     * - strings
+     *
+     * @param clazz
+     * @param v
+     * @param <T>
+     * @return
+     * @throws InstantiationException
+     * @throws IllegalAccessException
+     * @throws InvocationTargetException
+     */
     private static <T> Object convertToObject(Class clazz, Object v) throws InstantiationException, IllegalAccessException, InvocationTargetException {
-        // or maybe there is method with suitable parameter?
+
+        // deprimitivize
         if (clazz.isPrimitive() && primitves.get(clazz) != null) {
             clazz = primitves.get(clazz);
         }
+
+        // if class matches or is assignable - do  nothing ( this is certainly boolean )
+        if (clazz.isAssignableFrom(v.getClass())) {
+            //System.err.println("is assignable, return object");
+            return v;
+        }
+
         // do we have character? it needs special treatment
         if (clazz.equals(Character.class)) {
 
@@ -142,26 +165,53 @@ public class JSONUnmarshaller {
             }
 
         }
-        Constructor constructor = null;
-        try {
-            constructor = clazz.getConstructor(v.getClass());
-        } catch (NoSuchMethodException nsme) {
-            // we are failed here,  but so what? be lenient  and ignore this
-            return null;
-        }
+
         Object obj = null;
-        try {
-            obj = constructor.newInstance(v);
-        } catch (Exception e) {
-            // we can not instantiate - so what...
+        //System.err.println(" **************** retrieve constructor to convert to object " + clazz + " value:" + v.getClass());
+        // if we are here, we can process only string.
+        if (String.class.equals(v.getClass())) {
+            // as reflection is expensive on android,  we go for some direct access
+            if (Byte.class.equals(clazz)) {
+                return Byte.parseByte((String) v);
+            } else if (Double.class.equals(clazz)) {
+                return Double.parseDouble((String) v);
+            } else if (Float.class.equals(clazz)) {
+                return Float.parseFloat((String) v);
+            } else if (Integer.class.equals(clazz)) {
+                return Integer.parseInt((String) v);
+            } else if (Long.class.equals(clazz)) {
+                return Long.parseLong((String) v);
+            } else if (Short.class.equals(clazz)) {
+                return Short.parseShort((String) v);
+            }
+            // ok, here we go, try to obtain constructor
+            Constructor constructor = constructorCache.get(clazz);
+
+            try {
+                if (constructor == null) {
+                    constructor = clazz.getConstructor(v.getClass());
+                    constructorCache.put(clazz, constructor);
+                }
+            } catch (NoSuchMethodException nsme) {
+                // we are failed here,  but so what? be lenient  and ignore this
+                return null;
+            }
+
+            try {
+                obj = constructor.newInstance(v);
+            } catch (Exception e) {
+                // we can not instantiate - so what...
+            }
         }
         return obj;
     }
 
+
     /**
      * unmarshal current value, possibly walking down the three
      *
-     * @param reader
+     * @param reader json reader to pull value from
+     * @param clazz  expected class
      * @return
      * @throws IOException
      * @throws IllegalAccessException
@@ -192,7 +242,7 @@ public class JSONUnmarshaller {
                 }
                 break;
             case BEGIN_OBJECT:
-                // so, we are unmarshalling nested object - recyrse
+                // so, we are unmarshalling nested object - recurse
                 value = unmarshall(reader, clazz);
                 break;
             default:
@@ -259,9 +309,9 @@ public class JSONUnmarshaller {
      */
     private static Method getCandidateMethod(Class clazz, String name) {
         Method[] candidates = methodCache.get(clazz);
-        if(candidates == null) {
+        if (candidates == null) {
             candidates = clazz.getMethods();
-            methodCache.put(clazz,candidates);
+            methodCache.put(clazz, candidates);
         }
         for (Method method : candidates) {
             if (method.getParameterTypes().length == 1 && name.equals(method.getName()))
