@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>de.pribluda.android</groupId>
     <artifactId>jsonmarshaller</artifactId>
-    <version>0.5</version>
+    <version>0.6-SNAPSHOT</version>
     <url>https://github.com/ko5tik/jsonserializer</url>
     <description>
         Small json marshaller for POJOs to use in android
