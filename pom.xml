@@ -1,13 +1,23 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>de.pribluda.android</groupId>
     <artifactId>jsonmarshaller</artifactId>
     <version>0.6-SNAPSHOT</version>
+    <packaging>jar</packaging>
     <url>https://github.com/ko5tik/jsonserializer</url>
+    <name>JSON Marshaller</name>
     <description>
-        Small json marshaller for POJOs to use in android
+        Small lightweight json marshaller for POJOs to use in android.
     </description>
     <inceptionYear>2010</inceptionYear>
+    <licenses>
+        <license>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
     <scm>
         <developerConnection>scm:git:git://github.com/ko5tik/jsonserializer.git</developerConnection>
         <connection>scm:git:http://github.com/ko5tik/jsonserializer.git</connection>
@@ -34,7 +44,6 @@
                     <target>1.5</target>
                 </configuration>
             </plugin>
-
             <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
@@ -70,6 +79,7 @@
             <version>1.6</version>
         </dependency>
     </dependencies>
+    <!--
     <repositories>
         <repository>
             <id>m2-repo-java-net</id>
@@ -101,4 +111,5 @@
             <url>dav:https://www.pribluda.de/dav/projects</url>
         </site>
     </distributionManagement>
+    -->
 </project>
