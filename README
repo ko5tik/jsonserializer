@@ -3,7 +3,7 @@ POJOs to JSON strings intended to use in android applications.
 
 Core features:
   - small and lightweight
-  - no external dependecies (from android point of view)
+  - minimal external dependencies ( only GSON pull parser )
   - no metadata (use reflection)
   - simple to use
 
@@ -13,7 +13,8 @@ Current state:
   - unmarshalls POJO trees,  with arrays of POJOS or primitives 
   - no collection support yet due to lack of idea  how to determine 
     object type from  JSON
-  - maven artifact deployed to my private reposotory at: http://www.pribluda.de/m2/
+  - snapshots are deployed to sonatype OSS repository ( https://oss.sonatype.org/content/repositories/snapshots/ )
+  - releases are pushed to maven central
 
 Author(s)
   - Konstantin Pribluda (project founder)
