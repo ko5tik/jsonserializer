@@ -7,7 +7,7 @@
     </parent>
     <groupId>de.pribluda.android</groupId>
     <artifactId>jsonmarshaller</artifactId>
-    <version>0.6</version>
+    <version>0.7-SNAPSHOT</version>
     <packaging>jar</packaging>
     <url>https://github.com/ko5tik/jsonserializer</url>
     <name>JSON Marshaller</name>
