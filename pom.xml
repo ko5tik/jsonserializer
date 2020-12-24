@@ -9,7 +9,7 @@
     -->
     <groupId>de.pribluda.android</groupId>
     <artifactId>jsonmarshaller</artifactId>
-    <version>0.7</version>
+    <version>0.8-SNASPHOT</version>
     <packaging>jar</packaging>
     <url>https://github.com/ko5tik/jsonserializer</url>
     <name>JSON Marshaller</name>
