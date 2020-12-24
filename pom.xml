@@ -24,7 +24,7 @@
         </license>
     </licenses>
     <scm>
-        <developerConnection>scm:git:git://github.com/ko5tik/jsonserializer.git</developerConnection>
+        <developerConnection>scm:git:git://git@github.com:ko5tik/jsonserializer.git</developerConnection>
         <connection>scm:git:http://github.com/ko5tik/jsonserializer.git</connection>
         <url>git@github.com:ko5tik/jsonserializer.git</url>
     </scm>
@@ -85,7 +85,7 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.11</version>
+            <version>[4.13.1,)</version>
             <scope>test</scope>
         </dependency>
         <dependency>
