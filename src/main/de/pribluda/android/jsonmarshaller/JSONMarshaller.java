@@ -45,11 +45,9 @@ public class JSONMarshaller {
      * marshall supplied object (tree?) to JSON
      *
      * @param object
-     * @return
      */
     public static void marshall(JsonWriter writer, Object object) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException, IOException {
         marshallRecursive(writer, object);
-
     }
 
     /**
@@ -144,7 +142,6 @@ public class JSONMarshaller {
      * recursively marshall [multidimensional? - of course!!! ] array
      *
      * @param array
-     * @return
      */
     public static void marshallArray(JsonWriter writer, Object array) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, IOException {
         if (array.getClass().isArray()) {
