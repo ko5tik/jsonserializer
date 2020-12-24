@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>de.pribluda.android</groupId>
     <artifactId>jsonmarshaller</artifactId>
-    <version>0.9-SNAPSHOT</version>
+    <version>0.9</version>
     <packaging>jar</packaging>
     <url>https://github.com/ko5tik/jsonserializer</url>
     <name>JSON Marshaller</name>
@@ -22,7 +22,7 @@
         <developerConnection>scm:git:git@github.com:ko5tik/jsonserializer.git</developerConnection>
         <connection>scm:git:http://github.com/ko5tik/jsonserializer.git</connection>
         <url>git@github.com:ko5tik/jsonserializer.git</url>
-      <tag>jsonmarshaller-0.7</tag>
+      <tag>jsonmarshaller-0.9</tag>
   </scm>
     <developers>
         <developer>
