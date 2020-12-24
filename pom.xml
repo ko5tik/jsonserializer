@@ -26,7 +26,7 @@
         </license>
     </licenses>
     <scm>
-        <developerConnection>scm:git:git://git@github.com:ko5tik/jsonserializer.git</developerConnection>
+        <developerConnection>scm:git:ssh://git@github.com:ko5tik/jsonserializer.git</developerConnection>
         <connection>scm:git:http://github.com/ko5tik/jsonserializer.git</connection>
         <url>git@github.com:ko5tik/jsonserializer.git</url>
       <tag>jsonmarshaller-0.7</tag>
